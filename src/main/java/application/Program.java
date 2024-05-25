@@ -2,10 +2,11 @@ package src.main.java.application;
 
 import src.main.java.chess.ChessMatch;
 import src.main.java.chess.ChessPiece;
-import src.main.java.chess.ChessPosition;
 import src.main.java.chess.exceptions.ChessException;
 
+import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Program {
@@ -14,12 +15,13 @@ public class Program {
 
         var input = new Scanner(System.in);
         var chessMatch = new ChessMatch();
+        List<ChessPiece> capturedPiecesList = new ArrayList<>();
 
         while (true) {
 
             try {
                 UserInterface.clearScreen();
-                UserInterface.printMatch(chessMatch);
+                UserInterface.printMatch(chessMatch, capturedPiecesList);
                 System.out.println();
                 System.out.print("Source: ");
                 var source = UserInterface.readChessPosition(input);
@@ -32,7 +34,12 @@ public class Program {
                 System.out.print("Target: ");
                 var target = UserInterface.readChessPosition(input);
 
-                ChessPiece capturedPiece = chessMatch.performChessMove(source, target);
+                var capturedPiece = chessMatch.performChessMove(source, target);
+
+                if (capturedPiece != null) {
+                    capturedPiecesList.add(capturedPiece);
+                }
+
             } catch (ChessException | InputMismatchException exception) {
                 System.out.println(exception.getMessage());
                 input.nextLine();
