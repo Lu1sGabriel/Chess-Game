@@ -12,11 +12,53 @@ public class ChessMatch {
     private final Board board;
 
     public ChessMatch() {
-        this.board = new Board(8, 8);
-        initialSetup();
+        board = new Board(8, 8);
+        setupInitialPieces();
     }
 
-    private void initialSetup() {
+    public ChessPiece[][] getPieces() {
+        var pieceMatrix = new ChessPiece[board.getRows()][board.getColumns()];
+        for (int row = 0; row < board.getRows(); row++) {
+            for (int col = 0; col < board.getColumns(); col++) {
+                ChessPiece currentPiece = (ChessPiece) board.piece(row, col);
+                pieceMatrix[row][col] = currentPiece;
+            }
+        }
+        return pieceMatrix;
+    }
+
+    public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
+        var source = sourcePosition.toPosition();
+        var target = targetPosition.toPosition();
+        validateSourcePosition(source);
+        validateTargetPosition(source, target);
+        var capturedPiece = executeMove(source, target);
+        return (ChessPiece) capturedPiece;
+    }
+
+    private void validateSourcePosition(Position position) {
+        if (!board.thereIsAPiece(position)) {
+            throw new ChessException("Não há peça na posição de origem. ");
+        }
+        if (!board.piece(position).isThereAnyPossibleMove()) {
+            throw new ChessException("A peça escolhida não tem movimentos possíveis. ");
+        }
+    }
+
+    private void validateTargetPosition(Position source, Position target) {
+        if (!board.piece(source).possibleMove(target)) {
+            throw new ChessException("A peça escolhida não pode mover-se para a posição de destino. ");
+        }
+    }
+
+    private Piece executeMove(Position source, Position target) {
+        var movingPiece = board.removePiece(source);
+        var capturedPiece = board.removePiece(target);
+        board.placePiece(movingPiece, target);
+        return capturedPiece;
+    }
+
+    private void setupInitialPieces() {
         placeNewPiece('c', 1, new Rook(board, Color.WHITE));
         placeNewPiece('c', 2, new Rook(board, Color.WHITE));
         placeNewPiece('d', 2, new Rook(board, Color.WHITE));
@@ -32,42 +74,8 @@ public class ChessMatch {
         placeNewPiece('d', 8, new King(board, Color.BLACK));
     }
 
-    private void placeNewPiece(char colum, int row, ChessPiece piece) {
-        board.placePiece(piece, new ChessPosition(colum, row).toPosition());
-    }
-
-    public ChessPiece[][] getPieces() {
-        var mat = new ChessPiece[board.getRows()][board.getColumns()];
-        for (int i = 0; i < board.getRows(); i++) {
-            for (int j = 0; j < board.getColumns(); j++) {
-                mat[i][j] = (ChessPiece) board.piece(i, j);
-            }
-        }
-        return mat;
-    }
-
-    public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
-        var source = sourcePosition.toPosition();
-        var target = targetPosition.toPosition();
-        validateSourcePosition(source);
-        Piece capturedPiece = makeMove(source, target);
-        return (ChessPiece) capturedPiece;
-    }
-
-    private void validateSourcePosition(Position position) {
-        if (!board.thereIsAPiece(position)) {
-            throw new ChessException("Não existe peça na posição de origem. ");
-        }
-        if (!board.piece(position).isThereAnyPossibleMove()) {
-            throw new ChessException("Não existe nenhum movimento possível para a peça escolhida. ");
-        }
-    }
-
-    private Piece makeMove(Position source, Position target) {
-        var piece = board.removePiece(source);
-        var capturedPiece = board.removePiece(target);
-        board.placePiece(piece, target);
-        return capturedPiece;
+    private void placeNewPiece(char column, int row, ChessPiece piece) {
+        board.placePiece(piece, new ChessPosition(column, row).toPosition());
     }
 
 }

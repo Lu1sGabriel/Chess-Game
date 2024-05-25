@@ -16,8 +16,9 @@ public class King extends ChessPiece {
 
     //  TODO: Implementar lógica do Rei.
     @Override
-    public boolean[][] possibleMovies() {
-        return new boolean[getBoard().getRows()][getBoard().getColumns()];
+    public boolean[][] possibleMoves() {
+        boolean[][] matrix = new boolean[getBoard().getRows()][getBoard().getColumns()];
+        return matrix;
     }
 
 }
