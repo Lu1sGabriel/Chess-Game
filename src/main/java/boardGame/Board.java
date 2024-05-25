@@ -35,4 +35,11 @@ public class Board {
     public Piece piece(Position position) {
         return pieces[position.getRow()][position.getColumn()];
     }
+
+    public void placePiece(Piece piece, Position position) {
+        //  A peça na posição do tabuleiro recebe a peça que está sendo movida.
+        pieces[position.getRow()][position.getColumn()] = piece;
+        //  A peça recebe a posição.
+        piece.position = position;
+    }
 }

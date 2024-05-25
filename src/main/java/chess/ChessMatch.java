@@ -1,12 +1,16 @@
 package src.main.java.chess;
 
 import src.main.java.boardGame.Board;
+import src.main.java.boardGame.Position;
+import src.main.java.chess.pieces.King;
+import src.main.java.chess.pieces.Rook;
 
 public class ChessMatch {
     private final Board board;
 
     public ChessMatch() {
         this.board = new Board(8, 8);
+        initialSetup();
     }
 
     public ChessPiece[][] getPieces() {
@@ -17,5 +21,11 @@ public class ChessMatch {
             }
         }
         return mat;
+    }
+
+    private void initialSetup() {
+        board.placePiece(new Rook(board, Color.WHITE), new Position(2, 1));
+        board.placePiece(new King(board, Color.BLACK), new Position(0, 4));
+        board.placePiece(new King(board, Color.WHITE), new Position(7, 4));
     }
 }

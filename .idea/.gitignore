@@ -61,3 +61,5 @@ jdev/
 classes/
 deploy/
 *.jws
+
+.gitignore
