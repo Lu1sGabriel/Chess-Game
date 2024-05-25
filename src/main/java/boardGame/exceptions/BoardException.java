@@ -1,4 +1,4 @@
-package src.main.java.boardGame.exception;
+package src.main.java.boardGame.exceptions;
 
 import java.io.Serial;
 

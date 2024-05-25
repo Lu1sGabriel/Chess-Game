@@ -15,4 +15,7 @@ public class Piece {
         return board;
     }
 
+    protected void setPosition(Position position) {
+        this.position = position;
+    }
 }

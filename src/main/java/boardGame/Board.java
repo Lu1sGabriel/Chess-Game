@@ -1,18 +1,14 @@
 package src.main.java.boardGame;
 
-import src.main.java.boardGame.exception.BoardException;
+import src.main.java.boardGame.exceptions.BoardException;
 
 public class Board {
-    //  Quantidade de linhas
     private final int rows;
     private final int columns;
     private final Piece[][] pieces;
 
     public Board(int rows, int columns) {
-        if (rows < 1 || columns < 1) {
-            throw new BoardException("""
-                    Erro criando o tabuleiro: É necessário que haja pelo menos uma linha e uma coluna.""");
-        }
+        validateBoardSize(rows, columns);
         this.rows = rows;
         this.columns = columns;
         this.pieces = new Piece[rows][columns];
@@ -27,30 +23,21 @@ public class Board {
     }
 
     public Piece piece(int row, int column) {
-        if (!positionExists(row, column)) {
-            throw new BoardException("""
-                    Posição inexistente no tabuleiro.""");
-        }
+        validatePosition(row, column);
         return pieces[row][column];
     }
 
     public Piece piece(Position position) {
-        if (!positionExists(position)) {
-            throw new BoardException("""
-                    Posição inexistente no tabuleiro.""");
-        }
+        validatePosition(position);
         return pieces[position.getRow()][position.getColumn()];
     }
 
     public void placePiece(Piece piece, Position position) {
         if (thereIsAPiece(position)) {
-            throw new BoardException("""
-                    Já existe uma peça ocupando a posição.\s""" + position);
+            throw new BoardException("Já existe uma peça ocupando a posição: " + position);
         }
-        //  A peça na posição do tabuleiro recebe a peça que está sendo movida.
         pieces[position.getRow()][position.getColumn()] = piece;
-        //  A peça recebe a posição.
-        piece.position = position;
+        piece.setPosition(position);
     }
 
     public boolean positionExists(Position position) {
@@ -62,11 +49,23 @@ public class Board {
     }
 
     public boolean thereIsAPiece(Position position) {
-        if (!positionExists(position)) {
-            throw new BoardException("""
-                    Posição inexistente no tabuleiro.""");
-        }
+        validatePosition(position);
         return piece(position) != null;
     }
 
+    private void validateBoardSize(int rows, int columns) {
+        if (rows < 1 || columns < 1) {
+            throw new BoardException("Erro criando o tabuleiro: É necessário que haja pelo menos uma linha e uma coluna.");
+        }
+    }
+
+    private void validatePosition(int row, int column) {
+        if (!positionExists(row, column)) {
+            throw new BoardException("Posição inexistente no tabuleiro.");
+        }
+    }
+
+    private void validatePosition(Position position) {
+        validatePosition(position.getRow(), position.getColumn());
+    }
 }
