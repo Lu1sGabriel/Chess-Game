@@ -1,8 +1,10 @@
 package src.main.java.chess.exceptions;
 
+import src.main.java.boardGame.exceptions.BoardException;
+
 import java.io.Serial;
 
-public class ChessException extends RuntimeException {
+public class ChessException extends BoardException {
     @Serial
     private static final long serialVersionUID = 1L;
 

@@ -1,8 +1,12 @@
 package src.main.java.application;
 
 import src.main.java.chess.ChessPiece;
+import src.main.java.chess.ChessPosition;
 import src.main.java.chess.Color;
 import src.main.java.utils.TerminalColor;
+
+import java.util.InputMismatchException;
+import java.util.Scanner;
 
 public class UserInterface {
 
@@ -26,5 +30,17 @@ public class UserInterface {
         }
         System.out.print(" ");
     }
+
+    public static ChessPosition readChessPosition(Scanner input) {
+        try {
+            var userPosition = input.nextLine().replaceAll("\\s", "").toLowerCase(); // Remove todos os espaços
+            char column = userPosition.charAt(0);
+            int row = Integer.parseInt(userPosition.substring(1));
+            return new ChessPosition(column, row);
+        } catch (RuntimeException exception) {
+            throw new InputMismatchException("Erro lendo posições do Xadrez. Valores válidos são de a1 até a8. ");
+        }
+    }
+
 
 }

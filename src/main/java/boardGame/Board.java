@@ -40,6 +40,19 @@ public class Board {
         piece.setPosition(position);
     }
 
+    public Piece removePiece(Position position) {
+        if (!positionExists(position)) {
+            throw new BoardException("Essa posição não existe. ");
+        }
+        if (piece(position) == null) {
+            return null;
+        }
+        var auxiliary = piece(position);
+        auxiliary.position = null;
+        pieces[position.getRow()][position.getColumn()] = null;
+        return auxiliary;
+    }
+
     public boolean positionExists(Position position) {
         return positionExists(position.getRow(), position.getColumn());
     }
@@ -68,4 +81,5 @@ public class Board {
     private void validatePosition(Position position) {
         validatePosition(position.getRow(), position.getColumn());
     }
+
 }
