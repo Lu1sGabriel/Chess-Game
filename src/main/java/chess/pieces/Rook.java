@@ -26,7 +26,13 @@ public class Rook extends ChessPiece {
         boolean[][] validMoves = new boolean[getBoard().getRows()][getBoard().getColumns()];
         var currentPosition = new Position(0, 0);
 
-        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        // Define as quatro direções possíveis (vertical e horizontal)
+        int[][] directions = {
+                {-1, 0}, // Norte
+                {1, 0},  // Sul
+                {0, -1}, // Oeste
+                {0, 1}   // Leste
+        };
 
         for (int[] dir : directions) {
             int rowOffset = dir[0];
@@ -44,6 +50,5 @@ public class Rook extends ChessPiece {
 
         return validMoves;
     }
-
 
 }
