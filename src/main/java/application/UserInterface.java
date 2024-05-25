@@ -17,7 +17,7 @@ public class UserInterface {
             int row = Integer.parseInt(userPosition.substring(1));
             return new ChessPosition(column, row);
         } catch (RuntimeException exception) {
-            throw new InputMismatchException("Erro lendo posições do Xadrez. Valores válidos são de a1 até a8.");
+            throw new InputMismatchException("Erro lendo posições do Xadrez. Valores válidos são de a1 até a8. ");
         }
     }
 
@@ -25,17 +25,30 @@ public class UserInterface {
         for (int row = 0; row < pieces.length; row++) {
             System.out.print((8 - row) + " ");
             for (int column = 0; column < pieces[row].length; column++) {
-                printPiece(pieces[row][column]);
+                printPiece(pieces[row][column], false);
             }
             System.out.println();
         }
         System.out.println("  a b c d e f g h");
     }
 
+    public static void printBoard(ChessPiece[][] pieces, boolean[][] possibleMoves) {
+        for (int row = 0; row < pieces.length; row++) {
+            System.out.print((8 - row) + " ");
+            for (int column = 0; column < pieces[row].length; column++) {
+                printPiece(pieces[row][column], possibleMoves[row][column]);
+            }
+            System.out.println();
+        }
+        System.out.println("  a b c d e f g h");
+    }
 
-    private static void printPiece(ChessPiece piece) {
+    private static void printPiece(ChessPiece piece, boolean background) {
+        if (background) {
+            System.out.print(TerminalColor.ANSI_BLUE_BACKGROUND);
+        }
         if (piece == null) {
-            System.out.print("-");
+            System.out.print("-" + TerminalColor.ANSI_RESET);
         } else {
             if (piece.getColor() == Color.WHITE) {
                 System.out.print(TerminalColor.ANSI_WHITE + piece + TerminalColor.ANSI_RESET);

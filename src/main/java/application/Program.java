@@ -22,11 +22,15 @@ public class Program {
                 UserInterface.printBoard(chessMatch.getPieces());
                 System.out.println();
                 System.out.print("Source: ");
-                ChessPosition source = UserInterface.readChessPosition(input);
+                var source = UserInterface.readChessPosition(input);
+
+                boolean[][] possibleMoves = chessMatch.possibleMoves(source);
+                UserInterface.clearScreen();
+                UserInterface.printBoard(chessMatch.getPieces(), possibleMoves);
 
                 System.out.println();
                 System.out.print("Target: ");
-                ChessPosition target = UserInterface.readChessPosition(input);
+                var target = UserInterface.readChessPosition(input);
 
                 ChessPiece capturedPiece = chessMatch.performChessMove(source, target);
             } catch (ChessException | InputMismatchException exception) {
