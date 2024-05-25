@@ -13,4 +13,11 @@ public class King extends ChessPiece {
     public String toString() {
         return "K";
     }
+
+    //  TODO: Implementar lógica do Rei.
+    @Override
+    public boolean[][] possibleMovies() {
+        return new boolean[getBoard().getRows()][getBoard().getColumns()];
+    }
+
 }

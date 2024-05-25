@@ -25,8 +25,11 @@ public class UserInterface {
         if (piece == null) {
             System.out.print("-");
         } else {
-            String colorCode = (piece.getColor() == Color.WHITE) ? TerminalColor.ANSI_WHITE : TerminalColor.ANSI_YELLOW;
-            System.out.print(colorCode + piece + TerminalColor.ANSI_RESET);
+            if (piece.getColor() == Color.WHITE) {
+                System.out.print(TerminalColor.ANSI_WHITE + piece + TerminalColor.ANSI_RESET);
+            } else {
+                System.out.print(TerminalColor.ANSI_YELLOW + piece + TerminalColor.ANSI_RESET);
+            }
         }
         System.out.print(" ");
     }

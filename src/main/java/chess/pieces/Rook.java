@@ -14,4 +14,11 @@ public class Rook extends ChessPiece {
     public String toString() {
         return "R";
     }
+
+    //  TODO: Implementar lógica da Torre.
+    @Override
+    public boolean[][] possibleMovies() {
+        return new boolean[getBoard().getRows()][getBoard().getColumns()];
+    }
+
 }
