@@ -11,9 +11,23 @@ public class ChessMatch {
 
     private final Board board;
 
+    private int turn;
+
+    private Color currentPlayer;
+
     public ChessMatch() {
         board = new Board(8, 8);
+        turn = 1;
+        currentPlayer = Color.WHITE;
         setupInitialPieces();
+    }
+
+    public int getTurn() {
+        return turn;
+    }
+
+    public Color getCurrentPlayer() {
+        return currentPlayer;
     }
 
     private void setupInitialPieces() {
@@ -53,6 +67,7 @@ public class ChessMatch {
         validateSourcePosition(source);
         validateTargetPosition(source, target);
         var capturedPiece = executeMove(source, target);
+        nextTurn();
         return (ChessPiece) capturedPiece;
     }
 
@@ -65,6 +80,9 @@ public class ChessMatch {
     private void validateSourcePosition(Position position) {
         if (!board.thereIsAPiece(position)) {
             throw new ChessException("Não há peça na posição de origem. ");
+        }
+        if (currentPlayer != ((ChessPiece) board.piece(position)).getColor()) {
+            throw new ChessException("A peça escolhida não é sua. ");
         }
         if (!board.piece(position).isThereAnyPossibleMove()) {
             throw new ChessException("A peça escolhida não tem movimentos possíveis. ");
@@ -84,5 +102,13 @@ public class ChessMatch {
         return capturedPiece;
     }
 
+    private void nextTurn() {
+        turn++;
+        if (currentPlayer == Color.WHITE) {
+            currentPlayer = Color.BLACK;
+        } else {
+            currentPlayer = Color.WHITE;
+        }
+    }
 
 }

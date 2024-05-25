@@ -1,5 +1,6 @@
 package src.main.java.application;
 
+import src.main.java.chess.ChessMatch;
 import src.main.java.chess.ChessPiece;
 import src.main.java.chess.ChessPosition;
 import src.main.java.chess.Color;
@@ -62,6 +63,13 @@ public class UserInterface {
     public static void clearScreen() {
         System.out.println("\033[H\033[2J");
         System.out.flush();
+    }
+
+    public static void printMatch(ChessMatch chessMatch) {
+        printBoard(chessMatch.getPieces());
+        System.out.println();
+        System.out.println("Turno: " + chessMatch.getTurn());
+        System.out.println("Esperando o jogador: " + chessMatch.getCurrentPlayer());
     }
 
 }
