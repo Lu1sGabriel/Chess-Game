@@ -201,7 +201,7 @@ public class ChessMatch {
     }
 
     private boolean testCheckMate(final Color color) {
-        Objects.requireNonNull(color, "Color cannot be null");
+        Objects.requireNonNull(color, "A cor não pode ser nulla. ");
 
         if (!testCheck(color)) {
             return false;
@@ -210,7 +210,7 @@ public class ChessMatch {
         List<Piece> pieceList = piecesOnTheBoard.stream()
                 .filter(pieces -> ((ChessPiece) pieces).getColor().equals(color)).toList();
 
-        return pieceList.stream().anyMatch(piece -> !canPieceAvoidCheck(piece, color));
+        return pieceList.stream().noneMatch(piece -> canPieceAvoidCheck(piece, color));
     }
 
     private boolean canPieceAvoidCheck(final Piece piece, final Color color) {
