@@ -77,10 +77,16 @@ public class UserInterface {
         printCapturedPieces(capturedPieces);
         System.out.println();
         System.out.printf("Turno: %d%n", chessMatch.getTurn());
-        System.out.printf("Esperando o jogador: %s%n", chessMatch.getCurrentPlayer());
-        if (chessMatch.getCheck()) {
-            System.out.println("CHECK! ");
+        if (!chessMatch.getCheckMate()) {
+            System.out.printf("Esperando o jogador: %s%n", chessMatch.getCurrentPlayer());
+            if (chessMatch.getCheck()) {
+                System.out.println("CHECK! ");
+            }
+        } else {
+            System.out.println("CHECKMATE! ");
+            System.out.printf("O vencedor é: %s%n", chessMatch.getCurrentPlayer());
         }
+
     }
 
     private static void printCapturedPieces(final List<ChessPiece> capturedPieces) {
