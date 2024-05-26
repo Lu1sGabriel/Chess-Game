@@ -10,6 +10,8 @@ public abstract class ChessPiece extends Piece {
 
     private final Color color;
 
+    private int moveCount;
+
     public ChessPiece(final Board board, final Color color) {
         super(Objects.requireNonNull(board, "O tabuleiro não pode ser nullo. "));
         this.color = Objects.requireNonNull(color, "A cor não pode ser nulla. ");
@@ -17,6 +19,10 @@ public abstract class ChessPiece extends Piece {
 
     public Color getColor() {
         return color;
+    }
+
+    public int getMoveCount() {
+        return moveCount;
     }
 
     /**
@@ -41,6 +47,14 @@ public abstract class ChessPiece extends Piece {
         } else {
             return false;
         }
+    }
+
+    public void increaseMoveCount() {
+        moveCount++;
+    }
+
+    public void decreaseMoveCount() {
+        moveCount--;
     }
 
 }
