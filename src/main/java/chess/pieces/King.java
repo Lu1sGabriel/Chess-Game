@@ -5,10 +5,25 @@ import src.main.java.boardGame.Position;
 import src.main.java.chess.ChessPiece;
 import src.main.java.chess.Color;
 
+import java.util.Objects;
+
 public class King extends ChessPiece {
 
-    public King(Board board, Color color) {
-        super(board, color);
+    // Define as oito direções possíveis (horizontal, vertical e diagonal)
+    private static final int[][] DIRECTIONS = {
+            {-1, -1}, // Noroeste
+            {-1, 0},  // Norte
+            {-1, 1},  // Nordeste
+            {0, -1},  // Oeste
+            {0, 1},   // Leste
+            {1, -1},  // Sudoeste
+            {1, 0},   // Sul
+            {1, 1}    // Sudeste
+    };
+
+    public King(final Board board, final Color color) {
+        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nullo. "),
+                Objects.requireNonNull(color, "A cor não pode ser nulla. "));
     }
 
     @Override
@@ -25,19 +40,7 @@ public class King extends ChessPiece {
     public boolean[][] possibleMoves() {
         boolean[][] validMoves = new boolean[getBoard().getRows()][getBoard().getColumns()];
 
-        // Define as oito direções possíveis (horizontal, vertical e diagonal)
-        int[][] directions = {
-                {-1, -1}, // Noroeste
-                {-1, 0},  // Norte
-                {-1, 1},  // Nordeste
-                {0, -1},  // Oeste
-                {0, 1},   // Leste
-                {1, -1},  // Sudoeste
-                {1, 0},   // Sul
-                {1, 1}    // Sudeste
-        };
-
-        for (int[] moveDirection : directions) {
+        for (int[] moveDirection : DIRECTIONS) {
             int rowOffset = moveDirection[0];
             int colOffset = moveDirection[1];
 
@@ -55,7 +58,13 @@ public class King extends ChessPiece {
         return validMoves;
     }
 
-    private boolean canMove(Position newPosition) {
+    /**
+     * Verifica se o rei pode se mover para a posição especificada.
+     *
+     * @param newPosition a posição para verificar
+     * @return true se o rei pode se mover para a posição especificada, false caso contrário
+     */
+    private boolean canMove(final Position newPosition) {
         var pieceAtNewPosition = (ChessPiece) getBoard().piece(newPosition);
         return pieceAtNewPosition == null || pieceAtNewPosition.getColor() != getColor();
     }

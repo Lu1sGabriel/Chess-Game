@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 public class UserInterface {
 
-    public static ChessPosition readChessPosition(Scanner input) {
+    public static ChessPosition readChessPosition(final Scanner input) {
         try {
             var userPosition = input.nextLine().replaceAll("\\s", "").toLowerCase(); // Remove todos os espaços
             char column = userPosition.charAt(0);
@@ -24,42 +24,46 @@ public class UserInterface {
         }
     }
 
-    public static void printBoard(ChessPiece[][] pieces) {
+    public static void printBoard(final ChessPiece[][] pieces) {
+        StringBuilder sb = new StringBuilder();
         for (int row = 0; row < pieces.length; row++) {
-            System.out.print((8 - row) + " ");
+            sb.append((8 - row)).append(" ");
             for (int column = 0; column < pieces[row].length; column++) {
-                printPiece(pieces[row][column], false);
+                printPiece(pieces[row][column], false, sb);
             }
-            System.out.println();
+            sb.append(System.lineSeparator());
         }
-        System.out.println("  a b c d e f g h");
+        sb.append("  a b c d e f g h");
+        System.out.println(sb);
     }
 
-    public static void printBoard(ChessPiece[][] pieces, boolean[][] possibleMoves) {
+    public static void printBoard(final ChessPiece[][] pieces, final boolean[][] possibleMoves) {
+        StringBuilder sb = new StringBuilder();
         for (int row = 0; row < pieces.length; row++) {
-            System.out.print((8 - row) + " ");
+            sb.append((8 - row)).append(" ");
             for (int column = 0; column < pieces[row].length; column++) {
-                printPiece(pieces[row][column], possibleMoves[row][column]);
+                printPiece(pieces[row][column], possibleMoves[row][column], sb);
             }
-            System.out.println();
+            sb.append(System.lineSeparator());
         }
-        System.out.println("  a b c d e f g h");
+        sb.append("  a b c d e f g h");
+        System.out.println(sb);
     }
 
-    private static void printPiece(ChessPiece piece, boolean background) {
+    private static void printPiece(final ChessPiece piece, final boolean background, final StringBuilder sb) {
         if (background) {
-            System.out.print(TerminalColor.ANSI_BLUE_BACKGROUND);
+            sb.append(TerminalColor.ANSI_BLUE_BACKGROUND);
         }
         if (piece == null) {
-            System.out.print("-" + TerminalColor.ANSI_RESET);
+            sb.append("-").append(TerminalColor.ANSI_RESET);
         } else {
             if (piece.getColor() == Color.WHITE) {
-                System.out.print(TerminalColor.ANSI_WHITE + piece + TerminalColor.ANSI_RESET);
+                sb.append(TerminalColor.ANSI_WHITE).append(piece).append(TerminalColor.ANSI_RESET);
             } else {
-                System.out.print(TerminalColor.ANSI_YELLOW + piece + TerminalColor.ANSI_RESET);
+                sb.append(TerminalColor.ANSI_YELLOW).append(piece).append(TerminalColor.ANSI_RESET);
             }
         }
-        System.out.print(" ");
+        sb.append(" ");
     }
 
     public static void clearScreen() {
@@ -67,16 +71,19 @@ public class UserInterface {
         System.out.flush();
     }
 
-    public static void printMatch(ChessMatch chessMatch, List<ChessPiece> capturedPieces) {
+    public static void printMatch(final ChessMatch chessMatch, final List<ChessPiece> capturedPieces) {
         printBoard(chessMatch.getPieces());
         System.out.println();
         printCapturedPieces(capturedPieces);
         System.out.println();
-        System.out.println("Turno: " + chessMatch.getTurn());
-        System.out.println("Esperando o jogador: " + chessMatch.getCurrentPlayer());
+        System.out.printf("Turno: %d%n", chessMatch.getTurn());
+        System.out.printf("Esperando o jogador: %s%n", chessMatch.getCurrentPlayer());
+        if (chessMatch.getCheck()) {
+            System.out.println("CHECK! ");
+        }
     }
 
-    private static void printCapturedPieces(List<ChessPiece> capturedPieces) {
+    private static void printCapturedPieces(final List<ChessPiece> capturedPieces) {
         var white = capturedPieces.stream().filter(listElement -> listElement.getColor() == Color.WHITE).toList();
         var black = capturedPieces.stream().filter(listElement -> listElement.getColor() == Color.BLACK).toList();
         System.out.println("Peças capturadas: ");

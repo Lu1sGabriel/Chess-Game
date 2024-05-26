@@ -1,12 +1,14 @@
 package src.main.java.boardGame;
 
+import java.util.Objects;
+
 public abstract class Piece {
 
     protected Position position;
     private final Board board;
 
-    public Piece(Board board) {
-        this.board = board;
+    public Piece(final Board board) {
+        this.board = Objects.requireNonNull(board, "Board cannot be null");
         position = null;
     }
 
@@ -16,15 +18,16 @@ public abstract class Piece {
 
     public abstract boolean[][] possibleMoves();
 
-    public boolean possibleMove(Position position) {
+    public boolean possibleMove(final Position position) {
+        Objects.requireNonNull(position, "Position cannot be null");
         return possibleMoves()[position.getRow()][position.getColumn()];
     }
 
     public boolean isThereAnyPossibleMove() {
-        boolean[][] mat = possibleMoves();
-        for (boolean[] booleans : mat) {
-            for (int j = 0; j < mat.length; j++) {
-                if (booleans[j]) {
+        boolean[][] possibleMoves = possibleMoves();
+        for (boolean[] row : possibleMoves) {
+            for (boolean cell : row) {
+                if (cell) {
                     return true;
                 }
             }

@@ -5,10 +5,20 @@ import src.main.java.boardGame.Position;
 import src.main.java.chess.ChessPiece;
 import src.main.java.chess.Color;
 
+import java.util.Objects;
+
 public class Rook extends ChessPiece {
 
-    public Rook(Board board, Color color) {
-        super(board, color);
+    // Define as quatro direções possíveis (vertical e horizontal)
+    private static final int[][] DIRECTIONS = {
+            {-1, 0}, // Norte
+            {1, 0},  // Sul
+            {0, -1}, // Oeste
+            {0, 1}   // Leste
+    };
+
+    public Rook(final Board board, final Color color) {
+        super(Objects.requireNonNull(board, "Board cannot be null"), Objects.requireNonNull(color, "Color cannot be null"));
     }
 
     @Override
@@ -26,15 +36,7 @@ public class Rook extends ChessPiece {
         boolean[][] validMoves = new boolean[getBoard().getRows()][getBoard().getColumns()];
         var currentPosition = new Position(0, 0);
 
-        // Define as quatro direções possíveis (vertical e horizontal)
-        int[][] directions = {
-                {-1, 0}, // Norte
-                {1, 0},  // Sul
-                {0, -1}, // Oeste
-                {0, 1}   // Leste
-        };
-
-        for (int[] dir : directions) {
+        for (int[] dir : DIRECTIONS) {
             int rowOffset = dir[0];
             int colOffset = dir[1];
 
