@@ -7,9 +7,16 @@ import src.main.java.chess.Color;
 
 import java.util.Objects;
 
+/**
+ * Classe King que representa a peça de Rei no jogo de xadrez.
+ * Esta classe herda de ChessPiece.
+ */
 public class King extends ChessPiece {
 
-    // Define as oito direções possíveis (horizontal, vertical e diagonal)
+    /**
+     * Matriz de direções possíveis para o movimento do Rei.
+     * O Rei pode se mover em todas as direções: noroeste, norte, nordeste, oeste, leste, sudoeste, sul e sudeste.
+     */
     private static final int[][] DIRECTIONS = {
             {-1, -1}, // Noroeste
             {-1, 0},  // Norte
@@ -21,52 +28,66 @@ public class King extends ChessPiece {
             {1, 1}    // Sudeste
     };
 
+    /**
+     * Construtor da classe King.
+     *
+     * @param board Tabuleiro do jogo.
+     * @param color Cor da peça.
+     */
     public King(final Board board, final Color color) {
         super(Objects.requireNonNull(board, "O tabuleiro não pode ser nullo. "),
                 Objects.requireNonNull(color, "A cor não pode ser nulla. "));
     }
 
-    @Override
-    public String toString() {
-        return "K";
-    }
-
     /**
-     * Calcula os possíveis movimentos do rei.
+     * Calcula os movimentos possíveis para o Rei.
      *
-     * @return uma matriz booleana representando as casas onde o rei pode se mover
+     * @return Matriz booleana indicando os movimentos possíveis.
      */
     @Override
     public boolean[][] possibleMoves() {
         boolean[][] validMoves = new boolean[getBoard().getRows()][getBoard().getColumns()];
 
-        for (int[] moveDirection : DIRECTIONS) {
-            int rowOffset = moveDirection[0];
-            int colOffset = moveDirection[1];
-
-            int newRow = position.getRow() + rowOffset;
-            int newCol = position.getColumn() + colOffset;
-
-            Position newPosition = new Position(newRow, newCol);
-
-            // Verifica se a nova posição está dentro dos limites do tabuleiro
-            if (getBoard().positionExists(newPosition) && canMove(newPosition)) {
-                validMoves[newRow][newCol] = true;
-            }
+        for (int[] moveDirections : DIRECTIONS) {
+            checkDirection(validMoves, moveDirections[0], moveDirections[1]);
         }
 
         return validMoves;
     }
 
     /**
-     * Verifica se o rei pode se mover para a posição especificada.
+     * Verifica uma direção específica para os movimentos possíveis do Rei.
      *
-     * @param newPosition a posição para verificar
-     * @return true se o rei pode se mover para a posição especificada, false caso contrário
+     * @param validMoves Matriz de movimentos válidos a ser preenchida.
+     * @param rowOffset  Deslocamento na direção da linha.
+     * @param colOffset  Deslocamento na direção da coluna.
+     */
+    private void checkDirection(final boolean[][] validMoves, final int rowOffset, final int colOffset) {
+        var currentPosition = new Position(position.getRow() + rowOffset, position.getColumn() + colOffset);
+        if (getBoard().positionExists(currentPosition) && canMove(currentPosition)) {
+            validMoves[currentPosition.getRow()][currentPosition.getColumn()] = true;
+        }
+    }
+
+    /**
+     * Verifica se o Rei pode se mover para uma nova posição.
+     *
+     * @param newPosition A nova posição para a qual o Rei pode se mover.
+     * @return Verdadeiro se o Rei pode se mover para a nova posição, falso caso contrário.
      */
     private boolean canMove(final Position newPosition) {
         var pieceAtNewPosition = (ChessPiece) getBoard().piece(newPosition);
         return pieceAtNewPosition == null || pieceAtNewPosition.getColor() != getColor();
+    }
+
+    /**
+     * Retorna a representação em String do Rei.
+     *
+     * @return Uma string "K" que representa o Rei.
+     */
+    @Override
+    public String toString() {
+        return "K";
     }
 
 }

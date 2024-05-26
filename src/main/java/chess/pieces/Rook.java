@@ -7,9 +7,16 @@ import src.main.java.chess.Color;
 
 import java.util.Objects;
 
+/**
+ * Classe Rook que representa a peça de Torre no jogo de xadrez.
+ * Esta classe herda de ChessPiece.
+ */
 public class Rook extends ChessPiece {
 
-    // Define as quatro direções possíveis (vertical e horizontal)
+    /**
+     * Matriz de direções possíveis para o movimento da Torre.
+     * A Torre pode se mover nas direções norte, sul, oeste e leste.
+     */
     private static final int[][] DIRECTIONS = {
             {-1, 0}, // Norte
             {1, 0},  // Sul
@@ -17,40 +24,59 @@ public class Rook extends ChessPiece {
             {0, 1}   // Leste
     };
 
+    /**
+     * Construtor da classe Rook.
+     *
+     * @param board Tabuleiro do jogo.
+     * @param color Cor da peça.
+     */
     public Rook(final Board board, final Color color) {
-        super(Objects.requireNonNull(board, "Board cannot be null"), Objects.requireNonNull(color, "Color cannot be null"));
-    }
-
-    @Override
-    public String toString() {
-        return "R";
+        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nullo. "),
+                Objects.requireNonNull(color, "A cor não pode ser nulla. "));
     }
 
     /**
-     * Calcula as posições possíveis de movimento para a peça.
+     * Calcula os movimentos possíveis para a Torre.
      *
-     * @return Uma matriz booleana indicando as posições possíveis.
+     * @return Matriz booleana indicando os movimentos possíveis.
      */
     @Override
     public boolean[][] possibleMoves() {
         boolean[][] validMoves = new boolean[getBoard().getRows()][getBoard().getColumns()];
-        var currentPosition = new Position(0, 0);
 
-        for (int[] dir : DIRECTIONS) {
-            int rowOffset = dir[0];
-            int colOffset = dir[1];
-
-            currentPosition.setValues(this.position.getRow() + rowOffset, this.position.getColumn() + colOffset);
-            while (getBoard().positionExists(currentPosition) && !getBoard().thereIsAPiece(currentPosition)) {
-                validMoves[currentPosition.getRow()][currentPosition.getColumn()] = true;
-                currentPosition.setValues(currentPosition.getRow() + rowOffset, currentPosition.getColumn() + colOffset);
-            }
-            if (getBoard().positionExists(currentPosition) && isThereOpponentPiece(currentPosition)) {
-                validMoves[currentPosition.getRow()][currentPosition.getColumn()] = true;
-            }
+        for (int[] moveDirections : DIRECTIONS) {
+            checkDirection(validMoves, moveDirections[0], moveDirections[1]);
         }
 
         return validMoves;
+    }
+
+    /**
+     * Verifica uma direção específica para os movimentos possíveis da Torre.
+     *
+     * @param validMoves Matriz de movimentos válidos a ser preenchida.
+     * @param rowOffset  Deslocamento na direção da linha.
+     * @param colOffset  Deslocamento na direção da coluna.
+     */
+    private void checkDirection(final boolean[][] validMoves, final int rowOffset, final int colOffset) {
+        var currentPosition = new Position(position.getRow() + rowOffset, position.getColumn() + colOffset);
+        while (getBoard().positionExists(currentPosition) && !getBoard().thereIsAPiece(currentPosition)) {
+            validMoves[currentPosition.getRow()][currentPosition.getColumn()] = true;
+            currentPosition.setValues(currentPosition.getRow() + rowOffset, currentPosition.getColumn() + colOffset);
+        }
+        if (getBoard().positionExists(currentPosition) && isThereOpponentPiece(currentPosition)) {
+            validMoves[currentPosition.getRow()][currentPosition.getColumn()] = true;
+        }
+    }
+
+    /**
+     * Retorna a representação em String da Torre.
+     *
+     * @return Uma string "R" que representa a Torre.
+     */
+    @Override
+    public String toString() {
+        return "R";
     }
 
 }
