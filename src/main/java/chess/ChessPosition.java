@@ -17,7 +17,7 @@ public class ChessPosition {
 
     public ChessPosition(final char column, final int row) {
         if (column < MIN_COLUMN || column > MAX_COLUMN || row < MIN_ROW || row > MAX_ROW) {
-            throw new ChessException("Erro ao instanciar ChessPosition. Os valores válidos são de a1 a h8.");
+            throw new ChessException("Erro ao instanciar ChessPosition. Os valores válidos são de a1 a h8. ");
         }
         this.column = column;
         this.row = row;
@@ -36,7 +36,7 @@ public class ChessPosition {
     }
 
     protected static ChessPosition fromPosition(final Position position) {
-        Objects.requireNonNull(position, "Position cannot be null");
+        Objects.requireNonNull(position, "A posição nao pode ser nulla. ");
         return new ChessPosition((char) (MIN_COLUMN + position.getColumn()), MAX_ROW - position.getRow());
     }
 

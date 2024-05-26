@@ -3,7 +3,7 @@ package src.main.java.application;
 import src.main.java.chess.ChessMatch;
 import src.main.java.chess.ChessPiece;
 import src.main.java.chess.ChessPosition;
-import src.main.java.chess.Color;
+import src.main.java.chess.PlayerColor;
 import src.main.java.utils.TerminalColor;
 
 import java.util.Arrays;
@@ -57,7 +57,7 @@ public class UserInterface {
         if (piece == null) {
             sb.append("-").append(TerminalColor.ANSI_RESET);
         } else {
-            if (piece.getColor() == Color.WHITE) {
+            if (piece.getColor() == PlayerColor.WHITE) {
                 sb.append(TerminalColor.ANSI_WHITE).append(piece).append(TerminalColor.ANSI_RESET);
             } else {
                 sb.append(TerminalColor.ANSI_YELLOW).append(piece).append(TerminalColor.ANSI_RESET);
@@ -90,8 +90,8 @@ public class UserInterface {
     }
 
     private static void printCapturedPieces(final List<ChessPiece> capturedPieces) {
-        var white = capturedPieces.stream().filter(listElement -> listElement.getColor() == Color.WHITE).toList();
-        var black = capturedPieces.stream().filter(listElement -> listElement.getColor() == Color.BLACK).toList();
+        var white = capturedPieces.stream().filter(listElement -> listElement.getColor() == PlayerColor.WHITE).toList();
+        var black = capturedPieces.stream().filter(listElement -> listElement.getColor() == PlayerColor.BLACK).toList();
         System.out.println("Peças capturadas: ");
         System.out.println("Brancas: ");
         System.out.print(TerminalColor.ANSI_WHITE);

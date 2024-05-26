@@ -8,17 +8,17 @@ import java.util.Objects;
 
 public abstract class ChessPiece extends Piece {
 
-    private final Color color;
+    private final PlayerColor playerColor;
 
     private int moveCount;
 
-    public ChessPiece(final Board board, final Color color) {
+    public ChessPiece(final Board board, final PlayerColor playerColor) {
         super(Objects.requireNonNull(board, "O tabuleiro não pode ser nullo. "));
-        this.color = Objects.requireNonNull(color, "A cor não pode ser nulla. ");
+        this.playerColor = Objects.requireNonNull(playerColor, "A cor não pode ser nulla. ");
     }
 
-    public Color getColor() {
-        return color;
+    public PlayerColor getColor() {
+        return playerColor;
     }
 
     public int getMoveCount() {
@@ -43,7 +43,7 @@ public abstract class ChessPiece extends Piece {
     protected boolean isThereOpponentPiece(final Position position) {
         var piece = (ChessPiece) getBoard().piece(position);
         if (piece != null) {
-            return piece.getColor() != color;
+            return piece.getColor() != playerColor;
         } else {
             return false;
         }

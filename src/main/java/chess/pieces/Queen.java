@@ -3,7 +3,7 @@ package src.main.java.chess.pieces;
 import src.main.java.boardGame.Board;
 import src.main.java.boardGame.Position;
 import src.main.java.chess.ChessPiece;
-import src.main.java.chess.Color;
+import src.main.java.chess.PlayerColor;
 
 import java.util.Objects;
 
@@ -32,11 +32,11 @@ public class Queen extends ChessPiece {
      * Construtor da classe Queen.
      *
      * @param board O tabuleiro do jogo.
-     * @param color A cor da peça.
+     * @param playerColor A cor da peça.
      */
-    public Queen(Board board, Color color) {
+    public Queen(Board board, PlayerColor playerColor) {
         super(Objects.requireNonNull(board, "O tabuleiro não pode ser nulo. "),
-                Objects.requireNonNull(color, "A cor não pode ser nula. "));
+                Objects.requireNonNull(playerColor, "A cor não pode ser nula. "));
     }
 
     /**

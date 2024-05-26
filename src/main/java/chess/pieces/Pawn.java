@@ -3,7 +3,7 @@ package src.main.java.chess.pieces;
 import src.main.java.boardGame.Board;
 import src.main.java.boardGame.Position;
 import src.main.java.chess.ChessPiece;
-import src.main.java.chess.Color;
+import src.main.java.chess.PlayerColor;
 
 import java.util.Objects;
 
@@ -26,11 +26,11 @@ public class Pawn extends ChessPiece {
      * Construtor da classe Pawn.
      *
      * @param board Tabuleiro do jogo.
-     * @param color Cor da peça.
+     * @param playerColor Cor da peça.
      */
-    public Pawn(final Board board, final Color color) {
+    public Pawn(final Board board, final PlayerColor playerColor) {
         super(Objects.requireNonNull(board, "O tabuleiro não pode ser nullo. "),
-                Objects.requireNonNull(color, "A cor não pode ser nulla. "));
+                Objects.requireNonNull(playerColor, "A cor não pode ser nulla. "));
     }
 
     /**
@@ -42,7 +42,7 @@ public class Pawn extends ChessPiece {
     public boolean[][] possibleMoves() {
         boolean[][] validMoves = new boolean[getBoard().getRows()][getBoard().getColumns()];
 
-        if (getColor().equals(Color.WHITE)) {
+        if (getColor().equals(PlayerColor.WHITE)) {
             calculateWhitePawnMoves(validMoves);
         } else {
             calculateBlackPawnMoves(validMoves);
