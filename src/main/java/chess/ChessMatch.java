@@ -6,7 +6,6 @@ import src.main.java.boardGame.Position;
 import src.main.java.chess.exceptions.ChessException;
 import src.main.java.chess.pieces.*;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -162,8 +161,9 @@ public class ChessMatch {
         if (promoted == null) {
             throw new IllegalStateException("Não há peça a ser promovida. ");
         }
+
         if (!pieceType.equals("B") && !pieceType.equals("N") && !pieceType.equals("R") && !pieceType.equals("Q")) {
-            throw new InvalidParameterException("Tipo de peça escolhida inválida. ");
+            return promoted;
         }
 
         var position = promoted.getChessPosition().toPosition();
@@ -178,7 +178,6 @@ public class ChessMatch {
     }
 
     private ChessPiece newPiece(String pieceType, PlayerColor playerColor) {
-        var cleanedPieceType = pieceType.toUpperCase().replaceAll("\\s", "");
 
         return switch (pieceType) {
             case "B" -> new Bishop(board, playerColor);
