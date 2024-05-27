@@ -144,4 +144,5 @@ public class UserInterface {
         System.out.println(Arrays.toString(black.toArray()));
         System.out.print(TerminalColor.ANSI_RESET);
     }
+
 }

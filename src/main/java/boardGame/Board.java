@@ -11,12 +11,17 @@ import java.util.Objects;
 public class Board {
 
     private static final String POSITION_CANNOT_BE_NULL = "Posição não pode ser nula. ";
+
     private static final String PIECE_CANNOT_BE_NULL = "Peça não pode ser nula. ";
+
     private static final String POSITION_NOT_EXIST = "Posição inexistente no tabuleiro: %d, %d ";
+
     private static final String PIECE_ALREADY_EXIST = "Já existe uma peça nessa posição: %s ";
 
     private final int rows;
+
     private final int columns;
+
     private final Piece[][] pieces;
 
     /**

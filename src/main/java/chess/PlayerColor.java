@@ -5,6 +5,7 @@ package src.main.java.chess;
  * As cores possíveis são preto (BLACK) e branco (WHITE).
  */
 public enum PlayerColor {
+
     /**
      * Representa a cor preta.
      */

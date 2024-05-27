@@ -14,6 +14,9 @@ import java.util.Objects;
  */
 public class King extends ChessPiece {
 
+    /**
+     * Partida de xadrez associada a este rei.
+     */
     private final ChessMatch chessMatch;
 
     /**

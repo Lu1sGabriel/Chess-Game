@@ -94,4 +94,3 @@ public class TerminalColor {
     public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
 
 }
-
