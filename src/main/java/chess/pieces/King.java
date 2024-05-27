@@ -10,7 +10,7 @@ import java.util.Objects;
 
 /**
  * Classe King que representa a peça de Rei no jogo de xadrez.
- * Esta classe herda de ChessPiece.
+ * Esta classe herda de {@link ChessPiece}.
  */
 public class King extends ChessPiece {
 
@@ -36,10 +36,11 @@ public class King extends ChessPiece {
      *
      * @param board       Tabuleiro do jogo.
      * @param playerColor Cor da peça.
+     * @param chessMatch  A partida de xadrez atual.
      */
     public King(final Board board, final PlayerColor playerColor, ChessMatch chessMatch) {
-        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nullo. "),
-                Objects.requireNonNull(playerColor, "A cor não pode ser nulla. "));
+        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nulo."),
+                Objects.requireNonNull(playerColor, "A cor não pode ser nula."));
         this.chessMatch = chessMatch;
     }
 

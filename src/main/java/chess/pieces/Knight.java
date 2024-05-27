@@ -9,7 +9,7 @@ import java.util.Objects;
 
 /**
  * Classe Knight que representa a peça de Cavalo no jogo de xadrez.
- * Esta classe herda de ChessPiece.
+ * Esta classe herda de {@link ChessPiece}.
  */
 public class Knight extends ChessPiece {
 
@@ -31,12 +31,12 @@ public class Knight extends ChessPiece {
     /**
      * Construtor da classe Knight.
      *
-     * @param board Tabuleiro do jogo.
+     * @param board       Tabuleiro do jogo.
      * @param playerColor Cor da peça.
      */
     public Knight(Board board, PlayerColor playerColor) {
-        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nullo. "),
-                Objects.requireNonNull(playerColor, "A cor não pode ser nulla. "));
+        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nulo."),
+                Objects.requireNonNull(playerColor, "A cor não pode ser nula."));
     }
 
     /**
@@ -83,7 +83,7 @@ public class Knight extends ChessPiece {
     /**
      * Retorna a representação em String do Cavalo.
      *
-     * @return Uma string "K" que representa o Cavalo.
+     * @return Uma string "N" que representa o Cavalo.
      */
     @Override
     public String toString() {
