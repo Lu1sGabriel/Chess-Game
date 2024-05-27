@@ -13,8 +13,8 @@ public abstract class ChessPiece extends Piece {
     private int moveCount;
 
     public ChessPiece(final Board board, final PlayerColor playerColor) {
-        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nullo. "));
-        this.playerColor = Objects.requireNonNull(playerColor, "A cor não pode ser nulla. ");
+        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nulo. "));
+        this.playerColor = Objects.requireNonNull(playerColor, "A cor não pode ser nula. ");
     }
 
     public PlayerColor getColor() {

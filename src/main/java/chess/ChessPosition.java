@@ -36,7 +36,7 @@ public class ChessPosition {
     }
 
     protected static ChessPosition fromPosition(final Position position) {
-        Objects.requireNonNull(position, "A posição nao pode ser nulla. ");
+        Objects.requireNonNull(position, "A posição nao pode ser nula. ");
         return new ChessPosition((char) (MIN_COLUMN + position.getColumn()), MAX_ROW - position.getRow());
     }
 

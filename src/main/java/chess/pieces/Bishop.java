@@ -31,8 +31,8 @@ public class Bishop extends ChessPiece {
      * @param playerColor Cor da peça.
      */
     public Bishop(Board board, PlayerColor playerColor) {
-        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nullo. "),
-                Objects.requireNonNull(playerColor, "A cor não pode ser nulla. "));
+        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nulo. "),
+                Objects.requireNonNull(playerColor, "A cor não pode ser nula. "));
     }
 
     /**

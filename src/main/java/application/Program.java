@@ -40,6 +40,13 @@ public class Program {
                     capturedPiecesList.add(capturedPiece);
                 }
 
+                if (chessMatch.getPromoted() != null) {
+                    System.out.println("Digite a peça a ser escolhida (B/N/R/Q) :");
+                    var pieceType = input.nextLine();
+                    var cleanedPieceType = pieceType.toUpperCase().replaceAll("\\s", "");
+                    chessMatch.replacePromotedPiece(cleanedPieceType);
+                }
+
             } catch (ChessException | InputMismatchException exception) {
                 System.out.println(exception.getMessage());
                 input.nextLine();
