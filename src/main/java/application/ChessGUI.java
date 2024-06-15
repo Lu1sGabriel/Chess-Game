@@ -7,6 +7,8 @@ import src.main.java.chess.PlayerColor;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -29,6 +31,7 @@ public class ChessGUI extends JFrame {
     private final JPanel boardPanel = new JPanel(new GridLayout(BOARD_SIZE + 1, BOARD_SIZE + 1));
     private final JButton[][] boardSquares = new JButton[BOARD_SIZE][BOARD_SIZE];
     private final JLabel turnLabel = new JLabel("Turn: White", SwingConstants.CENTER);
+    private final JButton cancelButton = new JButton("Cancelar Ação");
     private final ChessMatch chessMatch = new ChessMatch();
     private ChessPosition sourcePosition;
     private boolean[][] possibleMoves;
@@ -65,8 +68,23 @@ public class ChessGUI extends JFrame {
         headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         headerPanel.add(turnLabel, BorderLayout.CENTER);
 
+        JPanel sidePanel = new JPanel(new BorderLayout());
+        sidePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        cancelButton.setEnabled(false);
+        cancelButton.setBackground(Color.RED);
+        cancelButton.setForeground(Color.WHITE);
+        cancelButton.setFont(new Font("Arial", Font.BOLD, 18));
+        cancelButton.setFocusPainted(false);
+        cancelButton.setBorder(new LineBorder(Color.RED));
+        cancelButton.setContentAreaFilled(false);
+        cancelButton.setOpaque(true);
+        cancelButton.addActionListener(e -> cancelAction());
+        cancelButton.setBorder(new EmptyBorder(10, 20, 10, 20));
+        sidePanel.add(cancelButton, BorderLayout.NORTH);
+
         add(headerPanel, BorderLayout.NORTH);
         add(boardPanel, BorderLayout.CENTER);
+        add(sidePanel, BorderLayout.EAST);
         setWindowSizeAndLocation();
 
         setGlassPane(new GlassPane());
@@ -148,6 +166,7 @@ public class ChessGUI extends JFrame {
         if (piece != null && piece.getColor() == chessMatch.getCurrentPlayer()) {
             sourcePosition = new ChessPosition((char) ('a' + col), 8 - row);
             possibleMoves = chessMatch.possibleMoves(sourcePosition);
+            cancelButton.setEnabled(true);
         } else {
             sourcePosition = null;
             possibleMoves = null;
@@ -214,10 +233,16 @@ public class ChessGUI extends JFrame {
         };
     }
 
+    private void cancelAction() {
+        resetSelection();
+        cancelButton.setEnabled(false);
+    }
+
     private void resetSelection() {
         sourcePosition = null;
         possibleMoves = null;
         updateBoard();
+        cancelButton.setEnabled(false);
     }
 
     private void showErrorDialog(String message) {
