@@ -11,16 +11,20 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 public class ChessGUI extends JFrame {
+
     private static final int BOARD_SIZE = 8;
     private static final Color LIGHT_COLOR = new Color(240, 217, 181);
     private static final Color DARK_COLOR = new Color(181, 136, 99);
     private static final Color HIGHLIGHT_COLOR = new Color(118, 150, 86);
     private static final Color CAPTURE_COLOR = new Color(255, 99, 71);
     private static final int BUTTON_SIZE = 80;
+    private static final String IMAGE_BASE_PATH = "/src/main/java/resources/images/pieces-basic-png/";
 
     private final JPanel boardPanel = new JPanel(new GridLayout(BOARD_SIZE + 1, BOARD_SIZE + 1));
     private final JButton[][] boardSquares = new JButton[BOARD_SIZE][BOARD_SIZE];
@@ -28,10 +32,25 @@ public class ChessGUI extends JFrame {
     private final ChessMatch chessMatch = new ChessMatch();
     private ChessPosition sourcePosition;
     private boolean[][] possibleMoves;
+    private final Map<String, ImageIcon> pieceIconCache = new HashMap<>();
 
     public ChessGUI() {
+        preloadPieceIcons();
         setupGUI();
         updateBoard();
+    }
+
+    private void preloadPieceIcons() {
+        String[] colors = {"white", "black"};
+        String[] pieces = {"king", "queen", "rook", "bishop", "knight", "pawn"};
+        for (String color : colors) {
+            for (String piece : pieces) {
+                String key = color + "_" + piece;
+                String path = String.format("%s%s-%s.png", IMAGE_BASE_PATH, color, piece);
+                URL imageURL = getClass().getResource(path);
+                pieceIconCache.put(key, Optional.ofNullable(imageURL).map(this::loadImage).orElse(null));
+            }
+        }
     }
 
     private void setupGUI() {
@@ -109,22 +128,30 @@ public class ChessGUI extends JFrame {
     }
 
     private void handleButtonClick(int row, int col) {
-        try {
-            if (sourcePosition == null) {
-                selectPiece(row, col);
-            } else {
-                movePiece(row, col);
+        SwingUtilities.invokeLater(() -> {
+            try {
+                if (sourcePosition == null) {
+                    selectPiece(row, col);
+                } else {
+                    movePiece(row, col);
+                }
+            } catch (Exception ex) {
+                showErrorDialog("Invalid Move: " + ex.getMessage());
+                resetSelection();
             }
-        } catch (Exception ex) {
-            showErrorDialog("Invalid Move: " + ex.getMessage());
-            resetSelection();
-        }
-        updateBoard();
+            updateBoard();
+        });
     }
 
     private void selectPiece(int row, int col) {
-        sourcePosition = new ChessPosition((char) ('a' + col), 8 - row);
-        possibleMoves = chessMatch.possibleMoves(sourcePosition);
+        ChessPiece piece = chessMatch.getPieces()[row][col];
+        if (piece != null && piece.getColor() == chessMatch.getCurrentPlayer()) {
+            sourcePosition = new ChessPosition((char) ('a' + col), 8 - row);
+            possibleMoves = chessMatch.possibleMoves(sourcePosition);
+        } else {
+            sourcePosition = null;
+            possibleMoves = null;
+        }
     }
 
     private void movePiece(int row, int col) {
@@ -152,7 +179,7 @@ public class ChessGUI extends JFrame {
         promotionDialog.setSize(500, 300);
         promotionDialog.setLocationRelativeTo(this);
 
-        String[] pieceIcons = getStrings(playerColor);
+        String[] pieceIcons = getPieceIconPaths(playerColor);
         String[] pieceCodes = {"Q", "R", "B", "N"};
 
         final String[] selectedPiece = {pieceCodes[0]};
@@ -176,13 +203,13 @@ public class ChessGUI extends JFrame {
         return selectedPiece[0];
     }
 
-    private static String[] getStrings(PlayerColor playerColor) {
-        String colorPrefix = playerColor == PlayerColor.WHITE ? "white" : "black";
+    private static String[] getPieceIconPaths(PlayerColor playerColor) {
+        String colorPrefix = playerColor != PlayerColor.WHITE ? "white" : "black";
         return new String[]{
-                String.format("/src/main/java/resources/images/pieces-basic-png/%s-queen.png", colorPrefix),
-                String.format("/src/main/java/resources/images/pieces-basic-png/%s-rook.png", colorPrefix),
-                String.format("/src/main/java/resources/images/pieces-basic-png/%s-bishop.png", colorPrefix),
-                String.format("/src/main/java/resources/images/pieces-basic-png/%s-knight.png", colorPrefix)
+                String.format("%s%s-queen.png", IMAGE_BASE_PATH, colorPrefix),
+                String.format("%s%s-rook.png", IMAGE_BASE_PATH, colorPrefix),
+                String.format("%s%s-bishop.png", IMAGE_BASE_PATH, colorPrefix),
+                String.format("%s%s-knight.png", IMAGE_BASE_PATH, colorPrefix)
         };
     }
 
@@ -197,24 +224,41 @@ public class ChessGUI extends JFrame {
 
     private void updateBoard() {
         ChessPiece[][] pieces = chessMatch.getPieces();
-        for (int row = 0; row < BOARD_SIZE; row++) {
-            for (int col = 0; col < BOARD_SIZE; col++) {
-                updateBoardSquare(row, col, pieces[row][col]);
+        SwingUtilities.invokeLater(() -> {
+            for (int row = 0; row < BOARD_SIZE; row++) {
+                for (int col = 0; col < BOARD_SIZE; col++) {
+                    updateBoardSquare(row, col, pieces[row][col]);
+                }
             }
-        }
-        updateTurnLabel();
+            updateTurnLabel();
+        });
     }
 
     private void updateBoardSquare(int row, int col, ChessPiece piece) {
         JButton button = boardSquares[row][col];
-        button.setIcon(Optional.ofNullable(piece).map(this::getPieceIcon).orElse(null));
+        Icon currentIcon = button.getIcon();
+        Icon newIcon = Optional.ofNullable(piece).map(this::getPieceIcon).orElse(null);
+        if (!Objects.equals(currentIcon, newIcon)) {
+            button.setIcon(newIcon);
+        }
         setButtonColor(button, row, col);
+
+        if (piece != null && piece.getColor() != chessMatch.getCurrentPlayer()) {
+            button.setEnabled(possibleMoves != null && possibleMoves[row][col]);
+            button.setToolTipText("Opponent's piece");
+        } else {
+            button.setEnabled(true);
+            button.setToolTipText(null);
+        }
+
         if (possibleMoves != null && possibleMoves[row][col]) {
             if (chessMatch.getPieces()[row][col] != null && !chessMatch.getPieces()[row][col].getColor().equals(chessMatch.getCurrentPlayer())) {
                 button.setBackground(CAPTURE_COLOR);
             } else {
                 button.setBackground(HIGHLIGHT_COLOR);
             }
+        } else {
+            button.setBackground((row + col) % 2 == 0 ? LIGHT_COLOR : DARK_COLOR);
         }
     }
 
@@ -225,9 +269,9 @@ public class ChessGUI extends JFrame {
     private Icon getPieceIcon(ChessPiece piece) {
         String pieceName = piece.getClass().getSimpleName().toLowerCase();
         String color = piece.getColor() == PlayerColor.WHITE ? "white" : "black";
-        String path = String.format("/src/main/java/resources/images/pieces-basic-png/%s-%s.png", color, pieceName);
-        URL imageURL = getClass().getResource(path);
-        return Optional.ofNullable(imageURL).map(this::loadImage).orElse(null);
+        String key = color + "_" + pieceName;
+
+        return pieceIconCache.get(key);
     }
 
     private ImageIcon loadImage(URL imageURL) {
@@ -257,4 +301,5 @@ public class ChessGUI extends JFrame {
             g.fillRect(0, 0, getWidth(), getHeight());
         }
     }
+
 }
