@@ -152,6 +152,7 @@ public class ChessGUI extends JFrame {
             sourcePosition = null;
             possibleMoves = null;
         }
+        updateBoard();
     }
 
     private void movePiece(int row, int col) {
@@ -204,7 +205,7 @@ public class ChessGUI extends JFrame {
     }
 
     private static String[] getPieceIconPaths(PlayerColor playerColor) {
-        String colorPrefix = playerColor != PlayerColor.WHITE ? "white" : "black";
+        String colorPrefix = playerColor == PlayerColor.WHITE ? "white" : "black";
         return new String[]{
                 String.format("%s%s-queen.png", IMAGE_BASE_PATH, colorPrefix),
                 String.format("%s%s-rook.png", IMAGE_BASE_PATH, colorPrefix),
@@ -216,6 +217,7 @@ public class ChessGUI extends JFrame {
     private void resetSelection() {
         sourcePosition = null;
         possibleMoves = null;
+        updateBoard();
     }
 
     private void showErrorDialog(String message) {
@@ -246,9 +248,12 @@ public class ChessGUI extends JFrame {
         if (piece != null && piece.getColor() != chessMatch.getCurrentPlayer()) {
             button.setEnabled(possibleMoves != null && possibleMoves[row][col]);
             button.setToolTipText("Opponent's piece");
-        } else {
-            button.setEnabled(true);
+        } else if (sourcePosition != null && possibleMoves != null) {
+            button.setEnabled(possibleMoves[row][col]);
             button.setToolTipText(null);
+        } else {
+            button.setEnabled(piece != null && piece.getColor() == chessMatch.getCurrentPlayer());
+            button.setToolTipText(piece == null ? null : "Your piece");
         }
 
         if (possibleMoves != null && possibleMoves[row][col]) {
