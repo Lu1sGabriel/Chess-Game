@@ -14,5 +14,10 @@ public enum PlayerColor {
     /**
      * Representa a cor branca.
      */
-    WHITE
+    WHITE;
+
+    public PlayerColor opponent() {
+        return this == WHITE ? BLACK : WHITE;
+    }
+
 }

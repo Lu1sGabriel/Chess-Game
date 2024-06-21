@@ -27,7 +27,7 @@ public class Bishop extends ChessPiece {
     /**
      * Construtor da classe Bishop.
      *
-     * @param board Tabuleiro do jogo.
+     * @param board       Tabuleiro do jogo.
      * @param playerColor Cor da peça.
      */
     public Bishop(Board board, PlayerColor playerColor) {

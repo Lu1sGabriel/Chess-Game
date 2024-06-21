@@ -2,13 +2,28 @@ package src.main.java.boardGame;
 
 import src.main.java.boardGame.exceptions.BoardException;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Classe que representa o tabuleiro de xadrez.
  * Gerencia a posição e manipulação das peças no tabuleiro.
+ * <p>
+ * Esta classe implementa Serializable para permitir que o estado do objeto
+ * seja salvo e carregado de um arquivo, ou transmitido pela rede.
  */
-public class Board {
+public class Board implements Serializable {
+
+    /**
+     * Identificador de versão da classe para fins de serialização.
+     * <p>
+     * Este identificador é utilizado pelo mecanismo de serialização
+     * para assegurar que a versão da classe que está sendo serializada
+     * seja compatível com a versão da classe que está sendo desserializada.
+     */
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String POSITION_CANNOT_BE_NULL = "Posição não pode ser nula. ";
 

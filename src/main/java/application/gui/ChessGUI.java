@@ -1,9 +1,10 @@
-package src.main.java.application;
+package src.main.java.application.gui;
 
 import src.main.java.chess.ChessMatch;
 import src.main.java.chess.ChessPiece;
 import src.main.java.chess.ChessPosition;
 import src.main.java.chess.PlayerColor;
+import src.main.java.utils.ChessSaveUtil;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -13,6 +14,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -31,18 +33,40 @@ public class ChessGUI extends JFrame {
     private final JPanel boardPanel = new JPanel(new GridLayout(BOARD_SIZE + 1, BOARD_SIZE + 1));
     private final JButton[][] boardSquares = new JButton[BOARD_SIZE][BOARD_SIZE];
     private final JLabel turnLabel = new JLabel("Turn: White", SwingConstants.CENTER);
+    private final JLabel scoreLabel = new JLabel("Score - White: 0, Black: 0", SwingConstants.CENTER);
     private final JButton cancelButton = new JButton("Cancelar Ação");
-    private final ChessMatch chessMatch = new ChessMatch();
+    private final JButton saveButton = new JButton("Salvar Partida");
+    private final JButton loadButton = new JButton("Carregar Partida");
+    private final JButton exitButton = new JButton("Sair");
+    private ChessMatch chessMatch;
     private ChessPosition sourcePosition;
     private boolean[][] possibleMoves;
     private final Map<String, ImageIcon> pieceIconCache = new HashMap<>();
+    private int whiteScore = 0;
+    private int blackScore = 0;
 
-    public ChessGUI() {
+    /**
+     * Constrói uma instância de ChessGUI com uma nova partida de xadrez.
+     */
+    protected ChessGUI() {
+        this(new ChessMatch());
+    }
+
+    /**
+     * Constrói uma instância de ChessGUI com a partida de xadrez especificada.
+     *
+     * @param chessMatch a instância de ChessMatch a ser usada por esta GUI
+     */
+    protected ChessGUI(ChessMatch chessMatch) {
+        this.chessMatch = chessMatch;
         preloadPieceIcons();
         setupGUI();
         updateBoard();
     }
 
+    /**
+     * Pré-carrega os ícones das peças de xadrez e os armazena em um cache.
+     */
     private void preloadPieceIcons() {
         String[] colors = {"white", "black"};
         String[] pieces = {"king", "queen", "rook", "bishop", "knight", "pawn"};
@@ -56,31 +80,39 @@ public class ChessGUI extends JFrame {
         }
     }
 
+    /**
+     * Configura os componentes da interface gráfica do usuário para o jogo de xadrez.
+     */
     private void setupGUI() {
         setTitle("Chess Game");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
         styleTurnLabel();
+        styleScoreLabel();
         initializeBoard();
 
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        headerPanel.add(turnLabel, BorderLayout.CENTER);
+        headerPanel.add(turnLabel, BorderLayout.NORTH);
+        headerPanel.add(scoreLabel, BorderLayout.SOUTH);
 
-        JPanel sidePanel = new JPanel(new BorderLayout());
+        JPanel sidePanel = new JPanel(new GridLayout(4, 1, 10, 10));
         sidePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        cancelButton.setEnabled(false);
-        cancelButton.setBackground(Color.RED);
-        cancelButton.setForeground(Color.WHITE);
-        cancelButton.setFont(new Font("Arial", Font.BOLD, 18));
-        cancelButton.setFocusPainted(false);
-        cancelButton.setBorder(new LineBorder(Color.RED));
-        cancelButton.setContentAreaFilled(false);
-        cancelButton.setOpaque(true);
+        styleButton(cancelButton, Color.RED);
+        styleButton(saveButton, new Color(0, 128, 0));
+        styleButton(loadButton, new Color(0, 128, 255));
+        styleButton(exitButton, new Color(128, 0, 0));
+
         cancelButton.addActionListener(e -> cancelAction());
-        cancelButton.setBorder(new EmptyBorder(10, 20, 10, 20));
-        sidePanel.add(cancelButton, BorderLayout.NORTH);
+        saveButton.addActionListener(e -> saveMatch());
+        loadButton.addActionListener(e -> loadMatch());
+        exitButton.addActionListener(e -> System.exit(0));
+
+        sidePanel.add(cancelButton);
+        sidePanel.add(saveButton);
+        sidePanel.add(loadButton);
+        sidePanel.add(exitButton);
 
         add(headerPanel, BorderLayout.NORTH);
         add(boardPanel, BorderLayout.CENTER);
@@ -93,6 +125,9 @@ public class ChessGUI extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Estiliza o rótulo de turno.
+     */
     private void styleTurnLabel() {
         turnLabel.setFont(new Font("Arial", Font.BOLD, 24));
         turnLabel.setOpaque(true);
@@ -101,24 +136,59 @@ public class ChessGUI extends JFrame {
         turnLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
     }
 
+    /**
+     * Estiliza o rótulo de pontuação.
+     */
+    private void styleScoreLabel() {
+        scoreLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        scoreLabel.setOpaque(true);
+        scoreLabel.setBackground(new Color(50, 50, 50));
+        scoreLabel.setForeground(Color.WHITE);
+        scoreLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+    }
+
+    /**
+     * Estiliza um botão com a cor especificada.
+     *
+     * @param button o botão a ser estilizado
+     * @param color  a cor a ser aplicada ao botão
+     */
+    private void styleButton(JButton button, Color color) {
+        button.setEnabled(true);
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("Arial", Font.BOLD, 18));
+        button.setFocusPainted(false);
+        button.setBorder(new LineBorder(color));
+        button.setContentAreaFilled(false);
+        button.setOpaque(true);
+        button.setBorder(new EmptyBorder(10, 20, 10, 20));
+    }
+
+    /**
+     * Define o tamanho e a localização da janela.
+     */
     private void setWindowSizeAndLocation() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setSize(screenSize.width / 2, (int) (screenSize.height / 1.5));
         setLocationRelativeTo(null);
     }
 
+    /**
+     * Inicializa o tabuleiro de xadrez.
+     */
     private void initializeBoard() {
         boardPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        boardPanel.add(new JLabel("")); // top-left corner
+        boardPanel.add(new JLabel("")); // canto superior esquerdo
 
-        // Add column labels
+        // Adiciona rótulos das colunas
         for (int col = 0; col < BOARD_SIZE; col++) {
             JLabel label = createLabel(String.valueOf((char) ('a' + col)));
             boardPanel.add(label);
         }
 
         for (int row = 0; row < BOARD_SIZE; row++) {
-            // Add row labels
+            // Adiciona rótulos das linhas
             JLabel label = createLabel(String.valueOf(BOARD_SIZE - row));
             boardPanel.add(label);
 
@@ -130,12 +200,25 @@ public class ChessGUI extends JFrame {
         }
     }
 
+    /**
+     * Cria um rótulo com o texto especificado.
+     *
+     * @param text o texto do rótulo
+     * @return o rótulo criado
+     */
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text, SwingConstants.CENTER);
         label.setFont(new Font("Arial", Font.BOLD, 18));
         return label;
     }
 
+    /**
+     * Cria um botão do tabuleiro de xadrez para a posição especificada.
+     *
+     * @param row a linha do botão
+     * @param col a coluna do botão
+     * @return o botão criado
+     */
     private JButton createBoardButton(int row, int col) {
         JButton button = new JButton();
         button.setPreferredSize(new Dimension(BUTTON_SIZE, BUTTON_SIZE));
@@ -145,6 +228,12 @@ public class ChessGUI extends JFrame {
         return button;
     }
 
+    /**
+     * Lida com o clique em um botão do tabuleiro.
+     *
+     * @param row a linha do botão clicado
+     * @param col a coluna do botão clicado
+     */
     private void handleButtonClick(int row, int col) {
         SwingUtilities.invokeLater(() -> {
             try {
@@ -154,13 +243,19 @@ public class ChessGUI extends JFrame {
                     movePiece(row, col);
                 }
             } catch (Exception ex) {
-                showErrorDialog("Invalid Move: " + ex.getMessage());
+                showErrorDialog("Movimento inválido: " + ex.getMessage());
                 resetSelection();
             }
             updateBoard();
         });
     }
 
+    /**
+     * Seleciona a peça na posição especificada.
+     *
+     * @param row a linha da peça
+     * @param col a coluna da peça
+     */
     private void selectPiece(int row, int col) {
         ChessPiece piece = chessMatch.getPieces()[row][col];
         if (piece != null && piece.getColor() == chessMatch.getCurrentPlayer()) {
@@ -174,6 +269,12 @@ public class ChessGUI extends JFrame {
         updateBoard();
     }
 
+    /**
+     * Move a peça para a posição especificada.
+     *
+     * @param row a linha de destino
+     * @param col a coluna de destino
+     */
     private void movePiece(int row, int col) {
         ChessPosition targetPosition = new ChessPosition((char) ('a' + col), 8 - row);
         try {
@@ -184,19 +285,31 @@ public class ChessGUI extends JFrame {
             }
             updateBoard();
             if (chessMatch.getCheck()) {
-                showErrorDialog("Check! You must protect your king!");
+                showErrorDialog("Cheque! Você deve proteger seu rei!");
+            }
+            if (chessMatch.getCheckMate()) {
+                PlayerColor winner = chessMatch.getCurrentPlayer().opponent();
+                updateScore(winner);
+                showWinnerDialog(winner);
+                resetGame();
             }
             resetSelection();
         } catch (Exception ex) {
-            showErrorDialog("Invalid Move: " + ex.getMessage());
+            showErrorDialog("Movimento inválido: " + ex.getMessage());
             resetSelection();
         }
     }
 
+    /**
+     * Permite ao jogador escolher uma peça de promoção.
+     *
+     * @param playerColor a cor do jogador
+     * @return o tipo de peça escolhida
+     */
     private String choosePromotionPiece(PlayerColor playerColor) {
-        JDialog promotionDialog = new JDialog(this, "Choose Promotion Piece", true);
-        promotionDialog.setLayout(new GridLayout(1, 4));
-        promotionDialog.setSize(500, 300);
+        JDialog promotionDialog = new JDialog(this, "Escolher Peça de Promoção", true);
+        promotionDialog.setLayout(new GridLayout(2, 2));
+        promotionDialog.setSize(500, 450);
         promotionDialog.setLocationRelativeTo(this);
 
         String[] pieceIcons = getPieceIconPaths(playerColor);
@@ -223,8 +336,14 @@ public class ChessGUI extends JFrame {
         return selectedPiece[0];
     }
 
+    /**
+     * Obtém os caminhos dos ícones das peças para a cor do jogador especificada.
+     *
+     * @param playerColor a cor do jogador
+     * @return uma matriz de caminhos dos ícones das peças
+     */
     private static String[] getPieceIconPaths(PlayerColor playerColor) {
-        String colorPrefix = playerColor == PlayerColor.WHITE ? "white" : "black";
+        String colorPrefix = playerColor != PlayerColor.WHITE ? "white" : "black";
         return new String[]{
                 String.format("%s%s-queen.png", IMAGE_BASE_PATH, colorPrefix),
                 String.format("%s%s-rook.png", IMAGE_BASE_PATH, colorPrefix),
@@ -233,11 +352,17 @@ public class ChessGUI extends JFrame {
         };
     }
 
+    /**
+     * Ação para cancelar a seleção da peça.
+     */
     private void cancelAction() {
         resetSelection();
         cancelButton.setEnabled(false);
     }
 
+    /**
+     * Redefine a seleção da peça.
+     */
     private void resetSelection() {
         sourcePosition = null;
         possibleMoves = null;
@@ -245,10 +370,18 @@ public class ChessGUI extends JFrame {
         cancelButton.setEnabled(false);
     }
 
+    /**
+     * Exibe um diálogo de erro com a mensagem especificada.
+     *
+     * @param message a mensagem de erro
+     */
     private void showErrorDialog(String message) {
         JOptionPane.showMessageDialog(this, message);
     }
 
+    /**
+     * Atualiza o tabuleiro de xadrez.
+     */
     private void updateBoard() {
         ChessPiece[][] pieces = chessMatch.getPieces();
         SwingUtilities.invokeLater(() -> {
@@ -261,6 +394,13 @@ public class ChessGUI extends JFrame {
         });
     }
 
+    /**
+     * Atualiza uma casa do tabuleiro de xadrez com a peça especificada.
+     *
+     * @param row   a linha da casa
+     * @param col   a coluna da casa
+     * @param piece a peça a ser exibida na casa
+     */
     private void updateBoardSquare(int row, int col, ChessPiece piece) {
         JButton button = boardSquares[row][col];
         Icon currentIcon = button.getIcon();
@@ -272,38 +412,52 @@ public class ChessGUI extends JFrame {
 
         if (piece != null && piece.getColor() != chessMatch.getCurrentPlayer()) {
             button.setEnabled(possibleMoves != null && possibleMoves[row][col]);
-            button.setToolTipText("Opponent's piece");
+            button.setToolTipText("Peça do oponente");
         } else if (sourcePosition != null && possibleMoves != null) {
             button.setEnabled(possibleMoves[row][col]);
             button.setToolTipText(null);
         } else {
             button.setEnabled(piece != null && piece.getColor() == chessMatch.getCurrentPlayer());
-            button.setToolTipText(piece == null ? null : "Your piece");
+            button.setToolTipText(piece == null ? null : "Sua peça");
         }
 
         if (possibleMoves != null && possibleMoves[row][col]) {
-            if (chessMatch.getPieces()[row][col] != null && !chessMatch.getPieces()[row][col].getColor().equals(chessMatch.getCurrentPlayer())) {
-                button.setBackground(CAPTURE_COLOR);
-            } else {
-                button.setBackground(HIGHLIGHT_COLOR);
-            }
+            button.setBackground((chessMatch.getPieces()[row][col] != null && !chessMatch.getPieces()[row][col].getColor().equals(chessMatch.getCurrentPlayer())) ? CAPTURE_COLOR : HIGHLIGHT_COLOR);
         } else {
             button.setBackground((row + col) % 2 == 0 ? LIGHT_COLOR : DARK_COLOR);
         }
     }
 
+    /**
+     * Define a cor do botão com base na posição.
+     *
+     * @param button o botão a ser colorido
+     * @param row    a linha do botão
+     * @param col    a coluna do botão
+     */
     private void setButtonColor(JButton button, int row, int col) {
         button.setBackground((row + col) % 2 == 0 ? LIGHT_COLOR : DARK_COLOR);
     }
 
+    /**
+     * Obtém o ícone da peça de xadrez especificada.
+     *
+     * @param piece a peça de xadrez
+     * @return o ícone da peça
+     */
     private Icon getPieceIcon(ChessPiece piece) {
         String pieceName = piece.getClass().getSimpleName().toLowerCase();
         String color = piece.getColor() == PlayerColor.WHITE ? "white" : "black";
         String key = color + "_" + pieceName;
-
         return pieceIconCache.get(key);
     }
 
+    /**
+     * Carrega uma imagem a partir de uma URL.
+     *
+     * @param imageURL a URL da imagem
+     * @return o ícone da imagem carregada
+     */
     private ImageIcon loadImage(URL imageURL) {
         try {
             BufferedImage originalImage = ImageIO.read(imageURL);
@@ -314,16 +468,88 @@ public class ChessGUI extends JFrame {
         }
     }
 
+    /**
+     * Atualiza o rótulo do turno para exibir o jogador atual.
+     */
     private void updateTurnLabel() {
         PlayerColor currentPlayer = chessMatch.getCurrentPlayer();
-        String player = currentPlayer == PlayerColor.WHITE ? "White" : "Black";
-        turnLabel.setText("Turn: " + player);
+        String player = currentPlayer == PlayerColor.WHITE ? "Branco" : "Preto";
+        turnLabel.setText("Turno: " + player);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(ChessGUI::new);
+    /**
+     * Atualiza a pontuação do jogo com base no vencedor.
+     *
+     * @param winner a cor do jogador vencedor
+     */
+    private void updateScore(PlayerColor winner) {
+        if (winner == PlayerColor.WHITE) {
+            whiteScore++;
+        } else {
+            blackScore++;
+        }
+        scoreLabel.setText(String.format("Pontuação - Branco: %d, Preto: %d", whiteScore, blackScore));
     }
 
+    /**
+     * Redefine o jogo de xadrez para uma nova partida.
+     */
+    private void resetGame() {
+        chessMatch = new ChessMatch();
+        updateBoard();
+        resetSelection();
+    }
+
+    /**
+     * Salva a partida de xadrez atual.
+     */
+    private void saveMatch() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Salvar Partida de Xadrez");
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            Path filePath = fileChooser.getSelectedFile().toPath();
+            try {
+                ChessSaveUtil.saveMatch(chessMatch, filePath);
+                showErrorDialog("Partida salva com sucesso em " + filePath);
+            } catch (IOException e) {
+                showErrorDialog("Erro ao salvar a partida: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Carrega uma partida de xadrez salva.
+     */
+    private void loadMatch() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Carregar Partida de Xadrez");
+        int userSelection = fileChooser.showOpenDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            Path filePath = fileChooser.getSelectedFile().toPath();
+            try {
+                chessMatch = ChessSaveUtil.loadMatch(filePath);
+                updateBoard();
+                showErrorDialog("Partida carregada com sucesso de " + filePath);
+            } catch (IOException | ClassNotFoundException e) {
+                showErrorDialog("Erro ao carregar a partida: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Exibe um diálogo com a mensagem do vencedor.
+     *
+     * @param winner a cor do jogador vencedor
+     */
+    private void showWinnerDialog(PlayerColor winner) {
+        String winnerMessage = "O vencedor é: " + (winner == PlayerColor.WHITE ? "Branco" : "Preto");
+        JOptionPane.showMessageDialog(this, winnerMessage, "Vencedor", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Classe interna para representar um painel de vidro translúcido.
+     */
     private static class GlassPane extends JComponent {
         @Override
         protected void paintComponent(Graphics g) {

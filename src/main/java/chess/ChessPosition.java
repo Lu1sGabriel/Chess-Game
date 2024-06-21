@@ -3,13 +3,28 @@ package src.main.java.chess;
 import src.main.java.boardGame.Position;
 import src.main.java.chess.exceptions.ChessException;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
 
 /**
  * Representa uma posição no tabuleiro de xadrez, definida por uma coluna e uma linha.
+ * <p>
+ * Esta classe implementa Serializable para permitir que o estado do objeto
+ * seja salvo e carregado de um arquivo, ou transmitido pela rede.
  */
-public record ChessPosition(char column, int row) {
+public record ChessPosition(char column, int row) implements Serializable {
+
+    /**
+     * Identificador de versão da classe para fins de serialização.
+     * <p>
+     * Este identificador é utilizado pelo mecanismo de serialização
+     * para assegurar que a versão da classe que está sendo serializada
+     * seja compatível com a versão da classe que está sendo desserializada.
+     */
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * Valor mínimo possível para a coluna (a).

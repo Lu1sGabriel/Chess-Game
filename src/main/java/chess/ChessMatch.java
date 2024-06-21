@@ -6,6 +6,8 @@ import src.main.java.boardGame.Position;
 import src.main.java.chess.exceptions.ChessException;
 import src.main.java.chess.pieces.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,8 +15,21 @@ import java.util.Objects;
 /**
  * Representa uma partida de xadrez. Contém a lógica principal do jogo, incluindo as regras de movimento,
  * validação de movimentos, verificação de xeque e xeque-mate, entre outras funcionalidades.
+ * <p>
+ * Esta classe implementa Serializable para permitir que o estado do objeto
+ * seja salvo e carregado de um arquivo, ou transmitido pela rede.
  */
-public class ChessMatch {
+public class ChessMatch implements Serializable {
+
+    /**
+     * Identificador de versão da classe para fins de serialização.
+     * <p>
+     * Este identificador é utilizado pelo mecanismo de serialização
+     * para assegurar que a versão da classe que está sendo serializada
+     * seja compatível com a versão da classe que está sendo desserializada.
+     */
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * O tabuleiro de xadrez para a partida.
@@ -368,7 +383,7 @@ public class ChessMatch {
                 rookSource = new Position(source.getRow(), source.getColumn() - 4);
                 rookTarget = new Position(source.getRow(), source.getColumn() - 1);
             }
-            ChessPiece rook = (ChessPiece) board.removePiece(rookSource);
+            var rook = (ChessPiece) board.removePiece(rookSource);
             board.placePiece(rook, rookTarget);
             rook.increaseMoveCount();
         }
@@ -401,7 +416,7 @@ public class ChessMatch {
         var kingPosition = kingColor(playerColor).getChessPosition().toPosition();
         var opponentPieceList = piecesOnTheBoard.stream()
                 .filter(pieces -> ((ChessPiece) pieces).getColor().equals(opponent(playerColor))).toList();
-        for (Piece piece : opponentPieceList) {
+        for (var piece : opponentPieceList) {
             boolean[][] matrix = piece.possibleMoves();
             if (matrix[kingPosition.getRow()][kingPosition.getColumn()]) {
                 return true;
@@ -512,7 +527,7 @@ public class ChessMatch {
             return false;
         }
 
-        List<Piece> pieceList = piecesOnTheBoard.stream()
+        var pieceList = piecesOnTheBoard.stream()
                 .filter(pieces -> ((ChessPiece) pieces).getColor().equals(playerColor)).toList();
 
         return pieceList.stream().noneMatch(piece -> canPieceAvoidCheck(piece, playerColor));

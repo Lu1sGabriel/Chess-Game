@@ -1,13 +1,28 @@
 package src.main.java.boardGame;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Representa uma peça genérica do jogo de xadrez. Esta classe abstrata define comportamentos comuns
  * a todas as peças do jogo, como posição atual no tabuleiro, métodos para calcular movimentos possíveis
  * e verificação de disponibilidade de movimentos.
+ * <p>
+ * Esta classe implementa Serializable para permitir que o estado do objeto
+ * seja salvo e carregado de um arquivo, ou transmitido pela rede.
  */
-public abstract class Piece {
+public abstract class Piece implements Serializable {
+
+    /**
+     * Identificador de versão da classe para fins de serialização.
+     * <p>
+     * Este identificador é utilizado pelo mecanismo de serialização
+     * para assegurar que a versão da classe que está sendo serializada
+     * seja compatível com a versão da classe que está sendo desserializada.
+     */
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     protected Position position;
     private final Board board;
