@@ -1215,4 +1215,9 @@ Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull re
 
 ## Contato
 
-Para mais informações, entre em contato com [luis.santana.profissional@gmail.com](mailto:seu-email@exemplo.com).
+## Contato
+
+Para mais informações ou dúvidas sobre o projeto, entre em contato:
+
+- **Email:** [luis.santana.profissional@gmail.com](mailto:luis.santana.profissional@gmail.com)
+- **LinkedIn:** [Luis Gabriel Santana](https://www.linkedin.com/in/luisgabrielsantana/)
