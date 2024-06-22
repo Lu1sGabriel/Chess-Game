@@ -37,7 +37,6 @@ fácil de manter.
     - [Classes Utilitárias](#classes-utilitárias)
         - [ChessSaveUtil](#chesssaveutiljava)
         - [TerminalColor](#terminalcolorjava)
-- [Contribuições](#contribuições)
 - [Contato](#contato)
 
 ## Funcionalidades
@@ -1208,10 +1207,6 @@ utilizada para melhorar a legibilidade e a apresentação das mensagens de saíd
   mensagens.
 - **Melhorar a Legibilidade:** Utiliza cores para tornar as mensagens de erro, aviso e informação mais visíveis e fáceis
   de entender.
-
-## Contribuições
-
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e pull requests para melhorar este projeto.
 
 ## Contato
 
