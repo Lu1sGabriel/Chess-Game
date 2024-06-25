@@ -27,7 +27,7 @@ public abstract class Piece implements Serializable {
      */
     public Piece(Board board) {
         this.board = Objects.requireNonNull(board, "O tabuleiro não pode ser nulo.");
-        position = null;  // Posição inicial é nula
+        position = null;
     }
 
     public Position getPosition() {

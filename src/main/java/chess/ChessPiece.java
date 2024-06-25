@@ -36,27 +36,54 @@ public abstract class ChessPiece extends Piece implements Serializable {
         this.playerColor = Objects.requireNonNull(playerColor, "A cor não pode ser nula.");
     }
 
+    /**
+     * Retorna a cor do jogador que controla esta peça.
+     *
+     * @return A cor do jogador que controla esta peça.
+     */
     public PlayerColor getColor() {
         return playerColor;
     }
 
+    /**
+     * Retorna o número de movimentos que esta peça já fez.
+     *
+     * @return O número de movimentos que esta peça já fez.
+     */
     public int getMoveCount() {
         return moveCount;
     }
 
+    /**
+     * Retorna a posição de xadrez desta peça.
+     *
+     * @return A posição de xadrez desta peça.
+     */
     public ChessPosition getChessPosition() {
         return ChessPosition.fromPosition(position);
     }
 
+    /**
+     * Verifica se há uma peça adversária na posição fornecida.
+     *
+     * @param position A posição a ser verificada.
+     * @return true se houver uma peça adversária na posição fornecida, false caso contrário.
+     */
     protected boolean isThereOpponentPiece(Position position) {
         ChessPiece piece = (ChessPiece) getBoard().piece(position);
         return piece != null && piece.getColor() != playerColor;
     }
 
+    /**
+     * Incrementa o contador de movimentos desta peça.
+     */
     public void increaseMoveCount() {
         moveCount++;
     }
 
+    /**
+     * Decrementa o contador de movimentos desta peça.
+     */
     public void decreaseMoveCount() {
         moveCount--;
     }

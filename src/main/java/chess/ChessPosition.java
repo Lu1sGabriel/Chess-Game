@@ -24,6 +24,13 @@ public record ChessPosition(char column, int row) implements Serializable {
     private static final int MIN_ROW = 1;
     private static final int MAX_ROW = 8;
 
+    /**
+     * Constrói uma nova posição de xadrez com base na coluna e linha fornecidas.
+     *
+     * @param column A coluna da posição de xadrez.
+     * @param row    A linha da posição de xadrez.
+     * @throws ChessException Se a coluna ou linha fornecida não estiverem dentro dos limites válidos.
+     */
     public ChessPosition {
         if (column < MIN_COLUMN || column > MAX_COLUMN || row < MIN_ROW || row > MAX_ROW) {
             throw new ChessException("Erro ao instanciar ChessPosition. Os valores válidos são de a1 a h8.");

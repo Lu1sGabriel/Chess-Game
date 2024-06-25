@@ -16,6 +16,11 @@ public enum PlayerColor {
      */
     WHITE;
 
+    /**
+     * Retorna a cor oposta à cor atual.
+     *
+     * @return a cor oposta
+     */
     public PlayerColor opponent() {
         return this == WHITE ? BLACK : WHITE;
     }

@@ -9,15 +9,16 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
-
 /**
- * A classe MainMenu representa o menu principal do aplicativo de jogo de xadrez.
- * Ela fornece opções para iniciar um novo jogo, carregar um jogo existente ou sair do aplicativo.
+ * Classe responsável por exibir o menu principal do jogo de xadrez.
+ * <p>
+ * Esta classe estende JFrame e configura os componentes gráficos para
+ * exibir o título do jogo e botões para iniciar um novo jogo, carregar uma partida existente ou sair do jogo.
  */
 public class MainMenu extends JFrame {
 
     /**
-     * Constrói o MainMenu e inicializa os componentes da interface gráfica.
+     * Construtor que inicializa o menu principal do jogo de xadrez.
      */
     public MainMenu() {
         setTitle("Menu do Jogo de Xadrez");
@@ -55,10 +56,10 @@ public class MainMenu extends JFrame {
     }
 
     /**
-     * Estiliza um botão com uma cor de fundo especificada.
+     * Aplica estilo aos botões do menu.
      *
-     * @param button o JButton a ser estilizado
-     * @param color  a cor de fundo a ser definida
+     * @param button O botão a ser estilizado.
+     * @param color  A cor de fundo do botão.
      */
     private void styleButton(JButton button, Color color) {
         button.setBackground(color);
@@ -69,7 +70,7 @@ public class MainMenu extends JFrame {
     }
 
     /**
-     * Define o tamanho da janela e centraliza-a na tela.
+     * Define o tamanho da janela e a posiciona no centro da tela.
      */
     private void setWindowSizeAndLocation() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -78,7 +79,9 @@ public class MainMenu extends JFrame {
     }
 
     /**
-     * Inicia um novo jogo lançando o ChessGUI e fechando o menu principal.
+     * Inicia um novo jogo de xadrez.
+     * <p>
+     * Exibe uma tela de carregamento enquanto a interface gráfica do jogo é inicializada.
      */
     private void startNewGame() {
         showLoadingScreen("Carregando novo jogo...");
@@ -92,8 +95,9 @@ public class MainMenu extends JFrame {
     }
 
     /**
-     * Carrega um jogo existente a partir de um arquivo escolhido pelo usuário.
-     * Exibe um diálogo de erro se o arquivo não puder ser carregado.
+     * Carrega uma partida de xadrez a partir de um arquivo salvo.
+     * <p>
+     * Exibe uma tela de carregamento enquanto a partida é carregada.
      */
     private void loadGame() {
         JFileChooser fileChooser = new JFileChooser();
@@ -117,18 +121,18 @@ public class MainMenu extends JFrame {
     }
 
     /**
-     * Exibe um diálogo de erro com uma mensagem especificada.
+     * Exibe um diálogo de erro com a mensagem especificada.
      *
-     * @param message a mensagem de erro a ser exibida
+     * @param message A mensagem de erro a ser exibida.
      */
     private void showErrorDialog(String message) {
         JOptionPane.showMessageDialog(this, message);
     }
 
     /**
-     * Exibe uma tela de carregamento com uma mensagem especificada.
+     * Exibe uma tela de carregamento com a mensagem especificada.
      *
-     * @param message a mensagem a ser exibida na tela de carregamento
+     * @param message A mensagem a ser exibida na tela de carregamento.
      */
     private void showLoadingScreen(String message) {
         JDialog loadingDialog = new JDialog(this, "Aguarde", true);
@@ -140,7 +144,7 @@ public class MainMenu extends JFrame {
         SwingUtilities.invokeLater(() -> loadingDialog.setVisible(true));
         CompletableFuture.runAsync(() -> {
             try {
-                Thread.sleep(2000); // Simula o tempo de carregamento
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -149,9 +153,9 @@ public class MainMenu extends JFrame {
     }
 
     /**
-     * O método principal para lançar o menu principal do aplicativo de jogo de xadrez.
+     * Método principal para iniciar a aplicação.
      *
-     * @param args argumentos de linha de comando (não utilizados)
+     * @param args Argumentos da linha de comando.
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainMenu::new);

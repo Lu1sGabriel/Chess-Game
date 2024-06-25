@@ -21,6 +21,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Classe responsável por exibir a interface gráfica do usuário (GUI) para o jogo de xadrez.
+ * <p>
+ * Esta classe estende JFrame e configura os componentes gráficos para
+ * exibir o tabuleiro de xadrez, os controles do jogo e as informações do estado do jogo.
+ */
 public class ChessGUI extends JFrame {
 
     private static final int BOARD_SIZE = 8;
@@ -46,10 +52,18 @@ public class ChessGUI extends JFrame {
     private int whiteScore = 0;
     private int blackScore = 0;
 
+    /**
+     * Construtor que inicializa a interface gráfica do jogo de xadrez com uma nova partida.
+     */
     protected ChessGUI() {
         this(new ChessMatch());
     }
 
+    /**
+     * Construtor que inicializa a interface gráfica do jogo de xadrez com uma partida existente.
+     *
+     * @param chessMatch A partida de xadrez a ser exibida na interface gráfica.
+     */
     protected ChessGUI(ChessMatch chessMatch) {
         this.chessMatch = chessMatch;
         preloadPieceIcons().thenRun(() -> {
@@ -58,6 +72,11 @@ public class ChessGUI extends JFrame {
         });
     }
 
+    /**
+     * Pré-carrega os ícones das peças de xadrez para otimizar a performance.
+     *
+     * @return Um CompletableFuture que será concluído após o carregamento dos ícones.
+     */
     private CompletableFuture<Void> preloadPieceIcons() {
         return CompletableFuture.runAsync(() -> {
             String[] colors = {"white", "black"};
@@ -73,6 +92,9 @@ public class ChessGUI extends JFrame {
         });
     }
 
+    /**
+     * Configura a interface gráfica do usuário.
+     */
     private void setupGUI() {
         SwingUtilities.invokeLater(() -> {
             setTitle("Chess Game");
@@ -117,6 +139,9 @@ public class ChessGUI extends JFrame {
         });
     }
 
+    /**
+     * Aplica estilo ao rótulo de turno.
+     */
     private void styleTurnLabel() {
         turnLabel.setFont(new Font("Arial", Font.BOLD, 24));
         turnLabel.setOpaque(true);
@@ -125,6 +150,9 @@ public class ChessGUI extends JFrame {
         turnLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
     }
 
+    /**
+     * Aplica estilo ao rótulo de pontuação.
+     */
     private void styleScoreLabel() {
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 18));
         scoreLabel.setOpaque(true);
@@ -133,6 +161,12 @@ public class ChessGUI extends JFrame {
         scoreLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
     }
 
+    /**
+     * Aplica estilo aos botões.
+     *
+     * @param button O botão a ser estilizado.
+     * @param color  A cor de fundo do botão.
+     */
     private void styleButton(JButton button, Color color) {
         button.setEnabled(true);
         button.setBackground(color);
@@ -145,12 +179,18 @@ public class ChessGUI extends JFrame {
         button.setBorder(new EmptyBorder(10, 20, 10, 20));
     }
 
+    /**
+     * Define o tamanho da janela e a posiciona no centro da tela.
+     */
     private void setWindowSizeAndLocation() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setSize(screenSize.width / 2, (int) (screenSize.height / 1.5));
         setLocationRelativeTo(null);
     }
 
+    /**
+     * Inicializa o tabuleiro de xadrez na interface gráfica.
+     */
     private void initializeBoard() {
         boardPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         boardPanel.add(new JLabel("")); // canto superior esquerdo
@@ -172,12 +212,25 @@ public class ChessGUI extends JFrame {
         }
     }
 
+    /**
+     * Cria um rótulo com o texto especificado.
+     *
+     * @param text O texto do rótulo.
+     * @return O rótulo criado.
+     */
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text, SwingConstants.CENTER);
         label.setFont(new Font("Arial", Font.BOLD, 18));
         return label;
     }
 
+    /**
+     * Cria um botão para uma posição específica no tabuleiro.
+     *
+     * @param row A linha do botão.
+     * @param col A coluna do botão.
+     * @return O botão criado.
+     */
     private JButton createBoardButton(int row, int col) {
         JButton button = new JButton();
         button.setPreferredSize(new Dimension(BUTTON_SIZE, BUTTON_SIZE));
@@ -187,6 +240,12 @@ public class ChessGUI extends JFrame {
         return button;
     }
 
+    /**
+     * Trata o evento de clique em um botão do tabuleiro.
+     *
+     * @param row A linha do botão clicado.
+     * @param col A coluna do botão clicado.
+     */
     private void handleButtonClick(int row, int col) {
         SwingUtilities.invokeLater(() -> {
             try {
@@ -203,6 +262,12 @@ public class ChessGUI extends JFrame {
         });
     }
 
+    /**
+     * Seleciona uma peça no tabuleiro para movimentação.
+     *
+     * @param row A linha da peça a ser selecionada.
+     * @param col A coluna da peça a ser selecionada.
+     */
     private void selectPiece(int row, int col) {
         ChessPiece piece = chessMatch.getPieces()[row][col];
         if (piece != null && piece.getColor() == chessMatch.getCurrentPlayer()) {
@@ -216,6 +281,12 @@ public class ChessGUI extends JFrame {
         updateBoard();
     }
 
+    /**
+     * Move uma peça para a posição especificada.
+     *
+     * @param row A linha de destino.
+     * @param col A coluna de destino.
+     */
     private void movePiece(int row, int col) {
         ChessPosition targetPosition = new ChessPosition((char) ('a' + col), 8 - row);
         try {
@@ -242,6 +313,12 @@ public class ChessGUI extends JFrame {
         }
     }
 
+    /**
+     * Exibe um diálogo para o jogador escolher a peça de promoção.
+     *
+     * @param playerColor A cor do jogador.
+     * @return O tipo de peça escolhido para a promoção.
+     */
     private String choosePromotionPiece(PlayerColor playerColor) {
         JDialog promotionDialog = new JDialog(this, "Escolher Peça de Promoção", true);
         promotionDialog.setLayout(new GridLayout(2, 2));
@@ -249,7 +326,7 @@ public class ChessGUI extends JFrame {
         promotionDialog.setLocationRelativeTo(this);
 
         String[] pieceIcons = getPieceIconPaths(playerColor);
-        String[] pieceCodes = {"Q", "R", "B", "N"};
+        String[] pieceCodes = {"Queen", "Rook", "Bishop", "Knight"};
 
         final String[] selectedPiece = {pieceCodes[0]};
 
@@ -272,6 +349,12 @@ public class ChessGUI extends JFrame {
         return selectedPiece[0];
     }
 
+    /**
+     * Retorna os caminhos dos ícones das peças de promoção.
+     *
+     * @param playerColor A cor do jogador.
+     * @return Um array com os caminhos dos ícones das peças de promoção.
+     */
     private static String[] getPieceIconPaths(PlayerColor playerColor) {
         String colorPrefix = playerColor == PlayerColor.WHITE ? "white" : "black";
         return new String[]{
@@ -282,11 +365,17 @@ public class ChessGUI extends JFrame {
         };
     }
 
+    /**
+     * Cancela a ação atual e redefine a seleção.
+     */
     private void cancelAction() {
         resetSelection();
         cancelButton.setEnabled(false);
     }
 
+    /**
+     * Redefine a seleção de peças no tabuleiro.
+     */
     private void resetSelection() {
         sourcePosition = null;
         possibleMoves = null;
@@ -294,10 +383,18 @@ public class ChessGUI extends JFrame {
         cancelButton.setEnabled(false);
     }
 
+    /**
+     * Exibe um diálogo de erro com a mensagem especificada.
+     *
+     * @param message A mensagem de erro a ser exibida.
+     */
     private void showErrorDialog(String message) {
         JOptionPane.showMessageDialog(this, message);
     }
 
+    /**
+     * Atualiza o estado do tabuleiro de xadrez na interface gráfica.
+     */
     private void updateBoard() {
         ChessPiece[][] pieces = chessMatch.getPieces();
         SwingUtilities.invokeLater(() -> {
@@ -310,6 +407,13 @@ public class ChessGUI extends JFrame {
         });
     }
 
+    /**
+     * Atualiza uma casa específica do tabuleiro de xadrez na interface gráfica.
+     *
+     * @param row   A linha da casa.
+     * @param col   A coluna da casa.
+     * @param piece A peça a ser exibida na casa.
+     */
     private void updateBoardSquare(int row, int col, ChessPiece piece) {
         JButton button = boardSquares[row][col];
         Icon currentIcon = button.getIcon();
@@ -337,10 +441,23 @@ public class ChessGUI extends JFrame {
         }
     }
 
+    /**
+     * Define a cor de fundo de um botão do tabuleiro.
+     *
+     * @param button O botão a ser colorido.
+     * @param row    A linha do botão.
+     * @param col    A coluna do botão.
+     */
     private void setButtonColor(JButton button, int row, int col) {
         button.setBackground((row + col) % 2 == 0 ? LIGHT_COLOR : DARK_COLOR);
     }
 
+    /**
+     * Retorna o ícone da peça especificada.
+     *
+     * @param piece A peça de xadrez.
+     * @return O ícone da peça.
+     */
     private Icon getPieceIcon(ChessPiece piece) {
         String pieceName = piece.getClass().getSimpleName().toLowerCase();
         String color = piece.getColor() == PlayerColor.WHITE ? "white" : "black";
@@ -348,6 +465,12 @@ public class ChessGUI extends JFrame {
         return pieceIconCache.get(key);
     }
 
+    /**
+     * Carrega uma imagem a partir de uma URL.
+     *
+     * @param imageURL A URL da imagem.
+     * @return A imagem carregada como ImageIcon.
+     */
     private ImageIcon loadImage(URL imageURL) {
         try {
             BufferedImage originalImage = ImageIO.read(imageURL);
@@ -358,14 +481,22 @@ public class ChessGUI extends JFrame {
         }
     }
 
+    /**
+     * Atualiza o rótulo de turno com o jogador atual.
+     */
     private void updateTurnLabel() {
         PlayerColor currentPlayer = chessMatch.getCurrentPlayer();
         String player = currentPlayer == PlayerColor.WHITE ? "Branco" : "Preto";
         turnLabel.setText("Turno: " + player);
     }
 
+    /**
+     * Atualiza a pontuação do jogo com base no vencedor.
+     *
+     * @param winner O jogador vencedor.
+     */
     private void updateScore(PlayerColor winner) {
-        if (winner == PlayerColor.WHITE) {
+        if (winner != PlayerColor.WHITE) {
             whiteScore++;
         } else {
             blackScore++;
@@ -373,14 +504,18 @@ public class ChessGUI extends JFrame {
         scoreLabel.setText(String.format("Pontuação - Branco: %d, Preto: %d", whiteScore, blackScore));
     }
 
+    /**
+     * Reinicia o jogo de xadrez.
+     */
     private void resetGame() {
-        preloadPieceIcons().thenRun(() -> {
-            chessMatch = new ChessMatch();
-            updateBoard();
-            resetSelection();
-        });
+        chessMatch = new ChessMatch();
+        updateBoard();
+        resetSelection();
     }
 
+    /**
+     * Salva a partida de xadrez atual em um arquivo.
+     */
     private void saveMatch() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Salvar Partida de Xadrez");
@@ -396,6 +531,9 @@ public class ChessGUI extends JFrame {
         }
     }
 
+    /**
+     * Carrega uma partida de xadrez de um arquivo salvo.
+     */
     private void loadMatch() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Carregar Partida de Xadrez");
@@ -412,11 +550,24 @@ public class ChessGUI extends JFrame {
         }
     }
 
+    /**
+     * Exibe um diálogo com o vencedor da partida.
+     *
+     * @param winner O jogador vencedor.
+     */
     private void showWinnerDialog(PlayerColor winner) {
-        String winnerMessage = "O vencedor é: " + (winner == PlayerColor.WHITE ? "Branco" : "Preto");
-        JOptionPane.showMessageDialog(this, winnerMessage, "Vencedor", JOptionPane.INFORMATION_MESSAGE);
+        if (winner == null) {
+            JOptionPane.showMessageDialog(this, "Empate!", "Vencedor", JOptionPane.INFORMATION_MESSAGE);
+        } else if (winner != PlayerColor.WHITE) {
+            JOptionPane.showMessageDialog(this, "O vencedor é: Branco", "Vencedor", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "O vencedor é: Preto", "Vencedor", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
+    /**
+     * Classe interna para desenhar um painel de vidro semitransparente.
+     */
     private static class GlassPane extends JComponent {
         @Override
         protected void paintComponent(Graphics g) {
