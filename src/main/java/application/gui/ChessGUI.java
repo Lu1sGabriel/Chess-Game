@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class ChessGUI extends JFrame {
 
@@ -51,64 +52,69 @@ public class ChessGUI extends JFrame {
 
     protected ChessGUI(ChessMatch chessMatch) {
         this.chessMatch = chessMatch;
-        preloadPieceIcons();
-        setupGUI();
-        updateBoard();
+        preloadPieceIcons().thenRun(() -> {
+            setupGUI();
+            updateBoard();
+        });
     }
 
-    private void preloadPieceIcons() {
-        String[] colors = {"white", "black"};
-        String[] pieces = {"king", "queen", "rook", "bishop", "knight", "pawn"};
-        for (String color : colors) {
-            for (String piece : pieces) {
-                String key = color + "_" + piece;
-                String path = String.format("%s%s-%s.png", IMAGE_BASE_PATH, color, piece);
-                URL imageURL = getClass().getResource(path);
-                pieceIconCache.put(key, Optional.ofNullable(imageURL).map(this::loadImage).orElse(null));
+    private CompletableFuture<Void> preloadPieceIcons() {
+        return CompletableFuture.runAsync(() -> {
+            String[] colors = {"white", "black"};
+            String[] pieces = {"king", "queen", "rook", "bishop", "knight", "pawn"};
+            for (String color : colors) {
+                for (String piece : pieces) {
+                    String key = color + "_" + piece;
+                    String path = String.format("%s%s-%s.png", IMAGE_BASE_PATH, color, piece);
+                    URL imageURL = getClass().getResource(path);
+                    pieceIconCache.put(key, Optional.ofNullable(imageURL).map(this::loadImage).orElse(null));
+                }
             }
-        }
+        });
     }
 
     private void setupGUI() {
-        setTitle("Chess Game");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+        SwingUtilities.invokeLater(() -> {
+            setTitle("Chess Game");
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            setLayout(new BorderLayout());
 
-        styleTurnLabel();
-        styleScoreLabel();
-        initializeBoard();
+            styleTurnLabel();
+            styleScoreLabel();
+            initializeBoard();
 
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        headerPanel.add(turnLabel, BorderLayout.NORTH);
-        headerPanel.add(scoreLabel, BorderLayout.SOUTH);
+            JPanel headerPanel = new JPanel(new BorderLayout());
+            headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            headerPanel.add(turnLabel, BorderLayout.NORTH);
+            headerPanel.add(scoreLabel, BorderLayout.SOUTH);
 
-        JPanel sidePanel = new JPanel(new GridLayout(4, 1, 10, 10));
-        sidePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        styleButton(cancelButton, Color.RED);
-        styleButton(saveButton, new Color(0, 128, 0));
-        styleButton(loadButton, new Color(0, 128, 255));
-        styleButton(exitButton, new Color(128, 0, 0));
+            JPanel sidePanel = new JPanel(new GridLayout(4, 1, 10, 10));
+            sidePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            styleButton(cancelButton, Color.RED);
+            styleButton(saveButton, new Color(0, 128, 0));
+            styleButton(loadButton, new Color(0, 128, 255));
+            styleButton(exitButton, new Color(128, 0, 0));
 
-        cancelButton.addActionListener(e -> cancelAction());
-        saveButton.addActionListener(e -> saveMatch());
-        loadButton.addActionListener(e -> loadMatch());
-        exitButton.addActionListener(e -> System.exit(0));
+            cancelButton.addActionListener(e -> cancelAction());
+            saveButton.addActionListener(e -> saveMatch());
+            loadButton.addActionListener(e -> loadMatch());
+            exitButton.addActionListener(e -> System.exit(0));
 
-        sidePanel.add(cancelButton);
-        sidePanel.add(saveButton);
-        sidePanel.add(loadButton);
-        sidePanel.add(exitButton);
+            sidePanel.add(cancelButton);
+            sidePanel.add(saveButton);
+            sidePanel.add(loadButton);
+            sidePanel.add(exitButton);
 
-        add(headerPanel, BorderLayout.NORTH);
-        add(boardPanel, BorderLayout.CENTER);
-        add(sidePanel, BorderLayout.EAST);
-        setWindowSizeAndLocation();
+            add(headerPanel, BorderLayout.NORTH);
+            add(boardPanel, BorderLayout.CENTER);
+            add(sidePanel, BorderLayout.EAST);
+            setWindowSizeAndLocation();
 
-        setGlassPane(new GlassPane());
-        getGlassPane().setVisible(false);
+            setGlassPane(new GlassPane());
+            getGlassPane().setVisible(false);
 
-        setVisible(true);
+            setVisible(true);
+        });
     }
 
     private void styleTurnLabel() {
@@ -368,9 +374,11 @@ public class ChessGUI extends JFrame {
     }
 
     private void resetGame() {
-        chessMatch = new ChessMatch();
-        updateBoard();
-        resetSelection();
+        preloadPieceIcons().thenRun(() -> {
+            chessMatch = new ChessMatch();
+            updateBoard();
+            resetSelection();
+        });
     }
 
     private void saveMatch() {
@@ -396,7 +404,7 @@ public class ChessGUI extends JFrame {
             Path filePath = fileChooser.getSelectedFile().toPath();
             try {
                 chessMatch = ChessSaveUtil.loadMatch(filePath);
-                updateBoard();
+                preloadPieceIcons().thenRun(this::updateBoard);
                 showErrorDialog("Partida carregada com sucesso de " + filePath);
             } catch (IOException | ClassNotFoundException e) {
                 showErrorDialog("Erro ao carregar a partida: " + e.getMessage());
@@ -416,5 +424,4 @@ public class ChessGUI extends JFrame {
             g.fillRect(0, 0, getWidth(), getHeight());
         }
     }
-
 }
