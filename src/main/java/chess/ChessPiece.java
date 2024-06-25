@@ -9,33 +9,19 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Representa uma peça de xadrez abstrata que estende a classe Piece. Esta classe encapsula
- * funcionalidades comuns a todas as peças de xadrez, como cor, contagem de movimentos,
- * conversão de posição para posição de xadrez e verificação de peças adversárias.
+ * Representa uma peça de xadrez abstrata que estende a classe Piece.
+ * Esta classe encapsula funcionalidades comuns a todas as peças de xadrez,
+ * como cor, contagem de movimentos, conversão de posição para posição de xadrez e verificação de peças adversárias.
  * <p>
  * Esta classe implementa Serializable para permitir que o estado do objeto
  * seja salvo e carregado de um arquivo, ou transmitido pela rede.
  */
 public abstract class ChessPiece extends Piece implements Serializable {
 
-    /**
-     * Identificador de versão da classe para fins de serialização.
-     * <p>
-     * Este identificador é utilizado pelo mecanismo de serialização
-     * para assegurar que a versão da classe que está sendo serializada
-     * seja compatível com a versão da classe que está sendo desserializada.
-     */
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * A cor do jogador que controla esta peça.
-     */
     private final PlayerColor playerColor;
-
-    /**
-     * O número de movimentos que esta peça realizou.
-     */
     private int moveCount;
 
     /**
@@ -45,63 +31,32 @@ public abstract class ChessPiece extends Piece implements Serializable {
      * @param playerColor A cor do jogador que controla esta peça.
      * @throws NullPointerException Se o tabuleiro ou a cor do jogador fornecidos forem nulos.
      */
-    public ChessPiece(final Board board, final PlayerColor playerColor) {
-        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nulo. "));
-        this.playerColor = Objects.requireNonNull(playerColor, "A cor não pode ser nula. ");
+    public ChessPiece(Board board, PlayerColor playerColor) {
+        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nulo."));
+        this.playerColor = Objects.requireNonNull(playerColor, "A cor não pode ser nula.");
     }
 
-    /**
-     * Retorna a cor do jogador que controla esta peça.
-     *
-     * @return A cor do jogador.
-     */
     public PlayerColor getColor() {
         return playerColor;
     }
 
-    /**
-     * Retorna o número de movimentos que esta peça realizou.
-     *
-     * @return O número de movimentos da peça.
-     */
     public int getMoveCount() {
         return moveCount;
     }
 
-    /**
-     * Converte a posição desta peça de uma posição padrão para uma posição de xadrez.
-     *
-     * @return A posição de xadrez desta peça.
-     */
     public ChessPosition getChessPosition() {
         return ChessPosition.fromPosition(position);
     }
 
-    /**
-     * Verifica se há uma peça adversária na posição especificada.
-     *
-     * @param position A posição a ser verificada.
-     * @return true se houver uma peça adversária na posição especificada, false caso contrário.
-     */
-    protected boolean isThereOpponentPiece(final Position position) {
-        var piece = (ChessPiece) getBoard().piece(position);
-        if (piece != null) {
-            return piece.getColor() != playerColor;
-        } else {
-            return false;
-        }
+    protected boolean isThereOpponentPiece(Position position) {
+        ChessPiece piece = (ChessPiece) getBoard().piece(position);
+        return piece != null && piece.getColor() != playerColor;
     }
 
-    /**
-     * Incrementa o contador de movimentos desta peça.
-     */
     public void increaseMoveCount() {
         moveCount++;
     }
 
-    /**
-     * Decrementa o contador de movimentos desta peça.
-     */
     public void decreaseMoveCount() {
         moveCount--;
     }

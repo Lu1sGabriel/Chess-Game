@@ -12,13 +12,6 @@ import java.io.Serializable;
  */
 public class Position implements Serializable {
 
-    /**
-     * Identificador de versão da classe para fins de serialização.
-     * <p>
-     * Este identificador é utilizado pelo mecanismo de serialização
-     * para assegurar que a versão da classe que está sendo serializada
-     * seja compatível com a versão da classe que está sendo desserializada.
-     */
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -72,7 +65,7 @@ public class Position implements Serializable {
      */
     @Override
     public String toString() {
-        return row + ", " + column;
+        return String.format("%d, %d", row, column);
     }
 
 }

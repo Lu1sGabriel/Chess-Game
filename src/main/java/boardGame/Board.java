@@ -1,54 +1,35 @@
 package src.main.java.boardGame;
 
-import src.main.java.boardGame.exceptions.BoardException;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Classe que representa o tabuleiro de xadrez.
- * Gerencia a posição e manipulação das peças no tabuleiro.
+ * Representa o tabuleiro de um jogo de xadrez, contendo as peças e gerenciando as operações
+ * de colocação, remoção e consulta de peças em posições específicas.
  * <p>
  * Esta classe implementa Serializable para permitir que o estado do objeto
  * seja salvo e carregado de um arquivo, ou transmitido pela rede.
  */
 public class Board implements Serializable {
 
-    /**
-     * Identificador de versão da classe para fins de serialização.
-     * <p>
-     * Este identificador é utilizado pelo mecanismo de serialização
-     * para assegurar que a versão da classe que está sendo serializada
-     * seja compatível com a versão da classe que está sendo desserializada.
-     */
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static final String POSITION_CANNOT_BE_NULL = "Posição não pode ser nula. ";
-
-    private static final String PIECE_CANNOT_BE_NULL = "Peça não pode ser nula. ";
-
-    private static final String POSITION_NOT_EXIST = "Posição inexistente no tabuleiro: %d, %d ";
-
-    private static final String PIECE_ALREADY_EXIST = "Já existe uma peça nessa posição: %s ";
-
     private final int rows;
-
     private final int columns;
-
     private final Piece[][] pieces;
 
     /**
-     * Construtor que cria um tabuleiro com o número especificado de linhas e colunas.
+     * Constrói uma instância de Board com o número especificado de linhas e colunas.
      *
-     * @param rows    Número de linhas do tabuleiro.
-     * @param columns Número de colunas do tabuleiro.
-     * @throws BoardException se o número de linhas ou colunas for menor que 1.
+     * @param rows    o número de linhas do tabuleiro
+     * @param columns o número de colunas do tabuleiro
+     * @throws IllegalArgumentException se o número de linhas ou colunas for menor ou igual a zero
      */
-    public Board(final int rows, final int columns) {
-        if (rows < 1 || columns < 1) {
-            throw new BoardException("Erro ao criar o tabuleiro: deve haver pelo menos uma linha e uma coluna. ");
+    public Board(int rows, int columns) {
+        if (rows <= 0 || columns <= 0) {
+            throw new IllegalArgumentException("Erro ao criar o tabuleiro: é necessário que haja pelo menos 1 linha e 1 coluna.");
         }
         this.rows = rows;
         this.columns = columns;
@@ -58,7 +39,7 @@ public class Board implements Serializable {
     /**
      * Retorna o número de linhas do tabuleiro.
      *
-     * @return Número de linhas do tabuleiro.
+     * @return o número de linhas
      */
     public int getRows() {
         return rows;
@@ -67,21 +48,21 @@ public class Board implements Serializable {
     /**
      * Retorna o número de colunas do tabuleiro.
      *
-     * @return Número de colunas do tabuleiro.
+     * @return o número de colunas
      */
     public int getColumns() {
         return columns;
     }
 
     /**
-     * Retorna a peça na posição especificada por linha e coluna.
+     * Retorna a peça na posição especificada.
      *
-     * @param row    Linha da posição da peça.
-     * @param column Coluna da posição da peça.
-     * @return A peça na posição especificada ou null se não houver peça.
-     * @throws BoardException se a posição for inválida.
+     * @param row    a linha da posição
+     * @param column a coluna da posição
+     * @return a peça na posição especificada, ou null se não houver peça
+     * @throws IllegalArgumentException se a posição for inválida
      */
-    public Piece piece(final int row, final int column) {
+    public Piece piece(int row, int column) {
         validatePosition(row, column);
         return pieces[row][column];
     }
@@ -89,114 +70,92 @@ public class Board implements Serializable {
     /**
      * Retorna a peça na posição especificada.
      *
-     * @param position A posição da peça.
-     * @return A peça na posição especificada ou null se não houver peça.
-     * @throws NullPointerException se a posição for nula.
-     * @throws BoardException       se a posição for inválida.
+     * @param position a posição a ser consultada
+     * @return a peça na posição especificada, ou null se não houver peça
+     * @throws NullPointerException     se a posição for nula
+     * @throws IllegalArgumentException se a posição for inválida
      */
-    public Piece piece(final Position position) {
-        Objects.requireNonNull(position, POSITION_CANNOT_BE_NULL);
-        validatePosition(position);
-        return pieces[position.getRow()][position.getColumn()];
+    public Piece piece(Position position) {
+        Objects.requireNonNull(position, "A posição não pode ser nula.");
+        return piece(position.getRow(), position.getColumn());
     }
 
     /**
      * Coloca uma peça na posição especificada.
      *
-     * @param piece    A peça a ser colocada no tabuleiro.
-     * @param position A posição onde a peça será colocada.
-     * @throws NullPointerException se a peça ou a posição forem nulas.
-     * @throws BoardException       se já houver uma peça na posição ou se a posição for inválida.
+     * @param piece    a peça a ser colocada
+     * @param position a posição onde a peça será colocada
+     * @throws NullPointerException     se a peça ou a posição forem nulas
+     * @throws IllegalArgumentException se já houver uma peça na posição
      */
-    public void placePiece(final Piece piece, final Position position) {
-        Objects.requireNonNull(piece, PIECE_CANNOT_BE_NULL);
-        Objects.requireNonNull(position, POSITION_CANNOT_BE_NULL);
+    public void placePiece(Piece piece, Position position) {
+        Objects.requireNonNull(piece, "A peça não pode ser nula.");
+        Objects.requireNonNull(position, "A posição não pode ser nula.");
         if (thereIsAPiece(position)) {
-            throw new BoardException(String.format(PIECE_ALREADY_EXIST, position));
+            throw new IllegalArgumentException("Já existe uma peça na posição " + position);
         }
         pieces[position.getRow()][position.getColumn()] = piece;
         piece.position = position;
     }
 
     /**
-     * Remove e retorna a peça na posição especificada.
+     * Remove a peça na posição especificada.
      *
-     * @param position A posição da peça a ser removida.
-     * @return A peça removida ou null se não houver peça na posição.
-     * @throws NullPointerException se a posição for nula.
-     * @throws BoardException       se a posição for inválida.
+     * @param position a posição de onde a peça será removida
+     * @return a peça removida, ou null se não houver peça
+     * @throws NullPointerException     se a posição for nula
+     * @throws IllegalArgumentException se a posição for inválida
      */
-    public Piece removePiece(final Position position) {
-        Objects.requireNonNull(position, POSITION_CANNOT_BE_NULL);
-        validatePosition(position);
-        if (piece(position) == null) {
+    public Piece removePiece(Position position) {
+        Objects.requireNonNull(position, "A posição não pode ser nula.");
+        validatePosition(position.getRow(), position.getColumn());
+        if (!thereIsAPiece(position)) {
             return null;
         }
-        var auxiliary = piece(position);
-        auxiliary.position = null;
+        Piece removedPiece = pieces[position.getRow()][position.getColumn()];
         pieces[position.getRow()][position.getColumn()] = null;
-        return auxiliary;
-    }
-
-    /**
-     * Verifica se a posição especificada por linha e coluna existe no tabuleiro.
-     *
-     * @param row    Linha da posição.
-     * @param column Coluna da posição.
-     * @return true se a posição existir no tabuleiro, caso contrário false.
-     */
-    private boolean positionExists(final int row, final int column) {
-        return row >= 0 && row < rows && column >= 0 && column < columns;
-    }
-
-    /**
-     * Verifica se a posição especificada existe no tabuleiro.
-     *
-     * @param position A posição a ser verificada.
-     * @return true se a posição existir no tabuleiro, caso contrário false.
-     * @throws NullPointerException se a posição for nula.
-     */
-    public boolean positionExists(final Position position) {
-        Objects.requireNonNull(position, POSITION_CANNOT_BE_NULL);
-        return positionExists(position.getRow(), position.getColumn());
+        if (removedPiece != null) {
+            removedPiece.position = null;
+        }
+        return removedPiece;
     }
 
     /**
      * Verifica se existe uma peça na posição especificada.
      *
-     * @param position A posição a ser verificada.
-     * @return true se houver uma peça na posição, caso contrário false.
-     * @throws NullPointerException se a posição for nula.
-     * @throws BoardException       se a posição for inválida.
+     * @param position a posição a ser verificada
+     * @return true se houver uma peça na posição, false caso contrário
+     * @throws NullPointerException     se a posição for nula
+     * @throws IllegalArgumentException se a posição for inválida
      */
-    public boolean thereIsAPiece(final Position position) {
-        Objects.requireNonNull(position, POSITION_CANNOT_BE_NULL);
-        validatePosition(position);
+    public boolean thereIsAPiece(Position position) {
+        Objects.requireNonNull(position, "A posição não pode ser nula.");
         return piece(position) != null;
     }
 
     /**
-     * Valida se a posição especificada por linha e coluna existe no tabuleiro.
+     * Verifica se a posição especificada está dentro dos limites do tabuleiro.
      *
-     * @param row    Linha da posição.
-     * @param column Coluna da posição.
-     * @throws BoardException se a posição não existir no tabuleiro.
+     * @param position a posição a ser verificada
+     * @return true se a posição estiver dentro dos limites, false caso contrário
+     * @throws NullPointerException se a posição for nula
      */
-    private void validatePosition(final int row, final int column) {
-        if (!positionExists(row, column)) {
-            throw new BoardException(String.format(POSITION_NOT_EXIST, row, column));
-        }
+    public boolean positionExists(Position position) {
+        Objects.requireNonNull(position, "A posição não pode ser nula.");
+        return position.getRow() >= 0 && position.getRow() < rows &&
+                position.getColumn() >= 0 && position.getColumn() < columns;
     }
 
     /**
-     * Valida se a posição especificada existe no tabuleiro.
+     * Valida se a posição especificada está dentro dos limites do tabuleiro.
      *
-     * @param position A posição a ser validada.
-     * @throws BoardException se a posição não existir no tabuleiro.
+     * @param row    a linha da posição
+     * @param column a coluna da posição
+     * @throws IllegalArgumentException se a posição for inválida
      */
-    private void validatePosition(final Position position) {
-        if (!positionExists(position)) {
-            throw new BoardException(String.format(POSITION_NOT_EXIST, position.getRow(), position.getColumn()));
+    private void validatePosition(int row, int column) {
+        if (row < 0 || row >= rows || column < 0 || column >= columns) {
+            throw new IllegalArgumentException("Posição fora do tabuleiro.");
         }
     }
 

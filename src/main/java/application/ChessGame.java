@@ -19,7 +19,7 @@ public class ChessGame {
     /**
      * Mensagem de valor inválido.
      */
-    private static final String INVALID_VALUE_MESSAGE = "Valor inválido! ";
+    private static final String INVALID_VALUE_MESSAGE = "Valor inválido. Os valores válidos são B, N, R e Q.";
 
     /**
      * Prompt para entrada da posição de origem.
@@ -41,7 +41,7 @@ public class ChessGame {
             var chessMatch = new ChessMatch();
             List<ChessPiece> capturedPiecesList = new ArrayList<>();
 
-            while (!chessMatch.getCheckMate()) {
+            while (!chessMatch.isCheckMate()) {
                 playTurn(input, chessMatch, capturedPiecesList);
             }
 
@@ -73,11 +73,17 @@ public class ChessGame {
             System.out.print(TARGET_PROMPT);
             var target = UserInterface.readChessPosition(input);
 
-            var capturedPiece = Optional.ofNullable(chessMatch.performChessMove(source, target));
+            String pieceType = null;
+            if (chessMatch.isPromotionPossible(source, target)) {
+                pieceType = choosePromotionPiece(input);
+            }
+
+            var capturedPiece = Optional.ofNullable(chessMatch.performChessMove(source, target, pieceType));
             capturedPiece.ifPresent(capturedPiecesList::add);
 
-            var promoted = Optional.ofNullable(chessMatch.getPromoted());
-            promoted.ifPresent(piece -> promotePiece(input, chessMatch));
+            if (chessMatch.getPromoted() != null && pieceType != null) {
+                chessMatch.replacePromotedPiece(pieceType); // Ensure the promoted piece is correctly handled.
+            }
 
         } catch (ChessException | InputMismatchException exception) {
             System.out.println(exception.getMessage());
@@ -85,20 +91,19 @@ public class ChessGame {
         }
     }
 
+
     /**
-     * Solicita ao jogador o tipo de peça para promoção e realiza a promoção.
-     *
-     * @param input      Scanner para ler a entrada do jogador.
-     * @param chessMatch Objeto que representa a partida de xadrez.
+     * @param input Scanner para leitura da entrada do jogador.
+     * @return String representando a peça escolhida para promoção.
      */
-    private static void promotePiece(Scanner input, ChessMatch chessMatch) {
-        System.out.println(PROMOTED_PIECE_INPUT_MESSAGE);
-        var pieceType = input.nextLine().trim().toUpperCase();
-        while (!pieceType.matches("[BNRQ]")) {
-            System.out.println(INVALID_VALUE_MESSAGE + PROMOTED_PIECE_INPUT_MESSAGE);
-            pieceType = input.nextLine().replaceAll("\\s", "").toUpperCase();
+    private static String choosePromotionPiece(Scanner input) {
+        System.out.print(PROMOTED_PIECE_INPUT_MESSAGE);
+        String pieceType = input.next().toUpperCase();
+        while (!pieceType.matches("[QRBN]")) {
+            System.out.println(INVALID_VALUE_MESSAGE);
+            pieceType = input.next().toUpperCase();
         }
-        chessMatch.replacePromotedPiece(pieceType);
+        return pieceType;
     }
 
 }

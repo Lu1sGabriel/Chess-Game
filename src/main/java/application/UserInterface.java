@@ -115,9 +115,9 @@ public class UserInterface {
         printCapturedPieces(capturedPieces);
         System.out.println();
         System.out.printf("Turno: %d%n", chessMatch.getTurn());
-        if (!chessMatch.getCheckMate()) {
+        if (!chessMatch.isCheckMate()) {
             System.out.printf("Esperando o jogador: %s%n", chessMatch.getCurrentPlayer());
-            if (chessMatch.getCheck()) {
+            if (chessMatch.isCheck()) {
                 System.out.println("CHECK!");
             }
         } else {

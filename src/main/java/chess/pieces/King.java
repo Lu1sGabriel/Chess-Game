@@ -60,7 +60,7 @@ public class King extends ChessPiece {
             checkDirection(validMoves, moveDirections[0], moveDirections[1]);
         }
 
-        if (getMoveCount() == 0 && !chessMatch.getCheck()) {
+        if (getMoveCount() == 0 && !chessMatch.isCheck()) {
             smallCastling(validMoves);
             largeCastling(validMoves);
         }

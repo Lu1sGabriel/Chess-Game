@@ -6,9 +6,6 @@ import src.main.java.chess.ChessMatch;
 import src.main.java.chess.ChessPiece;
 import src.main.java.chess.PlayerColor;
 
-import java.util.Objects;
-
-
 /**
  * Classe Pawn que representa um peão em um jogo de xadrez.
  * Esta classe herda de {@link ChessPiece}.
@@ -17,170 +14,72 @@ import java.util.Objects;
  */
 public class Pawn extends ChessPiece {
 
-    /**
-     * Partida de xadrez associada a este peão.
-     */
     private final ChessMatch chessMatch;
 
-    /**
-     * Offsets usados para calcular movimentos diagonais.
-     */
-    private static final int[] DIAGONAL_OFF_SETS = {-1, 1};
-
-    /**
-     * Direção do movimento para peões brancos.
-     */
-    private static final int WHITE_DIRECTION = -1;
-
-    /**
-     * Direção do movimento para peões negros.
-     */
-    private static final int BLACK_DIRECTION = 1;
-
-    /**
-     * Linha inicial de movimento duplo para peões brancos.
-     */
-    private static final int WHITE_INITIAL_MOVE_ROW = -2;
-
-    /**
-     * Linha inicial de movimento duplo para peões negros.
-     */
-    private static final int BLACK_INITIAL_MOVE_ROW = 2;
-
-    /**
-     * Linha onde pode ocorrer "en passant" para peões brancos.
-     */
-    private static final int WHITE_EN_PASSANT_ROW = 3;
-
-    /**
-     * Linha onde pode ocorrer "en passant" para peões negros.
-     */
-    private static final int BLACK_EN_PASSANT_ROW = 4;
-
-    /**
-     * Constrói um peão com o tabuleiro, cor do jogador e partida de xadrez especificados.
-     *
-     * @param board       O tabuleiro onde o peão está localizado.
-     * @param playerColor A cor do jogador (branco ou preto).
-     * @param chessMatch  A partida de xadrez associada a este peão.
-     * @throws NullPointerException se o tabuleiro ou a cor do jogador forem nulos.
-     */
-    public Pawn(final Board board, final PlayerColor playerColor, ChessMatch chessMatch) {
-        super(Objects.requireNonNull(board, "O tabuleiro não pode ser nulo."),
-                Objects.requireNonNull(playerColor, "A cor não pode ser nula."));
+    public Pawn(Board board, PlayerColor color, ChessMatch chessMatch) {
+        super(board, color);
         this.chessMatch = chessMatch;
     }
 
-    /**
-     * Calcula os movimentos possíveis para este peão no tabuleiro atual.
-     *
-     * @return Uma matriz booleana indicando as posições válidas para movimento.
-     */
     @Override
     public boolean[][] possibleMoves() {
-        boolean[][] validMoves = new boolean[getBoard().getRows()][getBoard().getColumns()];
+        boolean[][] mat = new boolean[getBoard().getRows()][getBoard().getColumns()];
+        Position p = new Position(0, 0);
 
-        if (getColor().equals(PlayerColor.WHITE)) {
-            calculatePawnMoves(validMoves, WHITE_DIRECTION, WHITE_INITIAL_MOVE_ROW, WHITE_EN_PASSANT_ROW);
+        if (getColor() == PlayerColor.WHITE) {
+            checkVerticalMove(mat, p, -1);
+            checkInitialTwoSquaresMove(mat, -1, -2);
+            checkDiagonalMove(mat, p, -1, -1);
+            checkDiagonalMove(mat, p, -1, 1);
+            checkEnPassantMove(mat, 3, -1);
         } else {
-            calculatePawnMoves(validMoves, BLACK_DIRECTION, BLACK_INITIAL_MOVE_ROW, BLACK_EN_PASSANT_ROW);
+            checkVerticalMove(mat, p, 1);
+            checkInitialTwoSquaresMove(mat, 1, 2);
+            checkDiagonalMove(mat, p, 1, -1);
+            checkDiagonalMove(mat, p, 1, 1);
+            checkEnPassantMove(mat, 4, 1);
         }
 
-        return validMoves;
+        return mat;
     }
 
-    /**
-     * Calcula os movimentos possíveis para o peão considerando direção, movimento inicial e "en passant".
-     *
-     * @param validMoves     A matriz de movimentos válidos a ser preenchida.
-     * @param direction      A direção do movimento do peão (para cima ou para baixo).
-     * @param initialMoveRow A linha para o movimento inicial duplo.
-     * @param enPassantRow   A linha onde o movimento "en passant" é possível.
-     */
-    private void calculatePawnMoves(final boolean[][] validMoves, final int direction, final int initialMoveRow, final int enPassantRow) {
-        checkVerticalMove(validMoves, direction);
-        checkInitialMove(validMoves, initialMoveRow, direction);
-        checkDiagonalMoves(validMoves, direction, enPassantRow);
-    }
-
-    /**
-     * Verifica e marca os movimentos verticais válidos para o peão.
-     *
-     * @param validMoves A matriz de movimentos válidos a ser preenchida.
-     * @param direction  A direção do movimento do peão (para cima ou para baixo).
-     */
-    private void checkVerticalMove(final boolean[][] validMoves, final int direction) {
-        var currentPosition = new Position(position.getRow() + direction, position.getColumn());
-        if (getBoard().positionExists(currentPosition) && !getBoard().thereIsAPiece(currentPosition)) {
-            validMoves[currentPosition.getRow()][currentPosition.getColumn()] = true;
+    private void checkVerticalMove(boolean[][] mat, Position p, int rowOffset) {
+        p.setValues(position.getRow() + rowOffset, position.getColumn());
+        if (getBoard().positionExists(p) && !getBoard().thereIsAPiece(p)) {
+            mat[p.getRow()][p.getColumn()] = true;
         }
     }
 
-    /**
-     * Verifica e marca o movimento inicial duplo válido para o peão.
-     *
-     * @param validMoves            A matriz de movimentos válidos a ser preenchida.
-     * @param initialMoveRow        A linha para o movimento inicial duplo.
-     * @param freePositionDirection A direção do movimento para verificar posições livres.
-     */
-    private void checkInitialMove(final boolean[][] validMoves, final int initialMoveRow, final int freePositionDirection) {
-        if (getMoveCount() == 0) {
-            var currentPosition = new Position(position.getRow() + initialMoveRow, position.getColumn());
-            var positionFree = new Position(position.getRow() + freePositionDirection, position.getColumn());
-            if (getBoard().positionExists(currentPosition) && !getBoard().thereIsAPiece(currentPosition)
-                    && getBoard().positionExists(positionFree) && !getBoard().thereIsAPiece(positionFree)) {
-                validMoves[currentPosition.getRow()][currentPosition.getColumn()] = true;
+    private void checkInitialTwoSquaresMove(boolean[][] mat, int rowOffset, int initialRowOffset) {
+        Position p1 = new Position(position.getRow() + rowOffset, position.getColumn());
+        Position p2 = new Position(position.getRow() + initialRowOffset, position.getColumn());
+        if (getBoard().positionExists(p1) && !getBoard().thereIsAPiece(p1) && getBoard().positionExists(p2) && !getBoard().thereIsAPiece(p2) && getMoveCount() == 0) {
+            mat[p2.getRow()][p2.getColumn()] = true;
+        }
+    }
+
+    private void checkDiagonalMove(boolean[][] mat, Position p, int rowOffset, int colOffset) {
+        p.setValues(position.getRow() + rowOffset, position.getColumn() + colOffset);
+        if (getBoard().positionExists(p) && isThereOpponentPiece(p)) {
+            mat[p.getRow()][p.getColumn()] = true;
+        }
+    }
+
+    private void checkEnPassantMove(boolean[][] mat, int row, int rowOffset) {
+        if (position.getRow() == row) {
+            Position left = new Position(position.getRow(), position.getColumn() - 1);
+            if (getBoard().positionExists(left) && isThereOpponentPiece(left) && getBoard().piece(left) == chessMatch.getEnPassantVulnerable()) {
+                mat[left.getRow() + rowOffset][left.getColumn()] = true;
+            }
+            Position right = new Position(position.getRow(), position.getColumn() + 1);
+            if (getBoard().positionExists(right) && isThereOpponentPiece(right) && getBoard().piece(right) == chessMatch.getEnPassantVulnerable()) {
+                mat[right.getRow() + rowOffset][right.getColumn()] = true;
             }
         }
     }
 
-    /**
-     * Verifica e marca os movimentos diagonais válidos para captura de peças e "en passant".
-     *
-     * @param validMoves   A matriz de movimentos válidos a ser preenchida.
-     * @param direction    A direção do movimento do peão (para cima ou para baixo).
-     * @param enPassantRow A linha onde o movimento "en passant" é possível.
-     */
-    private void checkDiagonalMoves(final boolean[][] validMoves, final int direction, final int enPassantRow) {
-        for (int offset : DIAGONAL_OFF_SETS) {
-            var diagonalCapture = new Position(position.getRow() + direction, position.getColumn() + offset);
-            if (getBoard().positionExists(diagonalCapture) && isThereOpponentPiece(diagonalCapture)) {
-                validMoves[diagonalCapture.getRow()][diagonalCapture.getColumn()] = true;
-            }
-
-            checkEnPassant(validMoves, direction, offset, enPassantRow);
-        }
-    }
-
-    /**
-     * Verifica e marca o movimento "en passant" válido para o peão.
-     *
-     * @param validMoves   A matriz de movimentos válidos a ser preenchida.
-     * @param direction    A direção do movimento do peão (para cima ou para baixo).
-     * @param offset       O offset para o movimento diagonal.
-     * @param enPassantRow A linha onde o movimento "en passant" é possível.
-     */
-    private void checkEnPassant(final boolean[][] validMoves, final int direction, final int offset, final int enPassantRow) {
-        if (position.getRow() == enPassantRow) {
-            var adjacentPawnPosition = new Position(position.getRow(), position.getColumn() + offset);
-            var enPassantCapturePosition = new Position(position.getRow() + direction, position.getColumn() + offset);
-            if (getBoard().positionExists(adjacentPawnPosition)
-                    && getBoard().positionExists(enPassantCapturePosition)
-                    && getBoard().piece(adjacentPawnPosition) != null
-                    && getBoard().piece(adjacentPawnPosition) == chessMatch.getEnPassantVulnerable()) {
-                validMoves[enPassantCapturePosition.getRow()][enPassantCapturePosition.getColumn()] = true;
-            }
-        }
-    }
-
-    /**
-     * Retorna a representação em string deste peão.
-     *
-     * @return Uma string "P" que representa o Peão.
-     */
     @Override
     public String toString() {
         return "P";
     }
-
 }

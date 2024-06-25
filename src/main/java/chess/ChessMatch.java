@@ -5,552 +5,373 @@ import src.main.java.boardGame.Piece;
 import src.main.java.boardGame.Position;
 import src.main.java.chess.exceptions.ChessException;
 import src.main.java.chess.pieces.*;
+import src.main.java.utils.ChessLogUtil;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
-/**
- * Representa uma partida de xadrez. Contém a lógica principal do jogo, incluindo as regras de movimento,
- * validação de movimentos, verificação de xeque e xeque-mate, entre outras funcionalidades.
- * <p>
- * Esta classe implementa Serializable para permitir que o estado do objeto
- * seja salvo e carregado de um arquivo, ou transmitido pela rede.
- */
 public class ChessMatch implements Serializable {
 
-    /**
-     * Identificador de versão da classe para fins de serialização.
-     * <p>
-     * Este identificador é utilizado pelo mecanismo de serialização
-     * para assegurar que a versão da classe que está sendo serializada
-     * seja compatível com a versão da classe que está sendo desserializada.
-     */
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * O tabuleiro de xadrez para a partida.
-     */
     private final Board board;
-
-    /**
-     * O número atual do turno.
-     */
     private int turn;
-
-    /**
-     * A cor do jogador atual.
-     */
     private PlayerColor currentPlayer;
-
-    /**
-     * Lista de peças atualmente no tabuleiro.
-     */
     private final List<Piece> piecesOnTheBoard;
-
-    /**
-     * Lista de peças capturadas.
-     */
     private final List<Piece> capturedPieces;
-
-    /**
-     * Indica se o jogador atual está em xeque.
-     */
     private boolean check;
-
-    /**
-     * Indica se o jogador atual está em xeque-mate.
-     */
     private boolean checkMate;
-
-    /**
-     * O peão vulnerável ao movimento en passant.
-     */
     private ChessPiece enPassantVulnerable;
-
-    /**
-     * A peça para qual um peão foi promovido.
-     */
     private ChessPiece promoted;
+    private final String matchId;
 
-    /**
-     * Construtor padrão para iniciar uma nova partida de xadrez. Inicializa o tabuleiro,
-     * define o turno inicial, jogador atual, e configura as peças iniciais no tabuleiro.
-     */
     public ChessMatch() {
-        board = new Board(8, 8);
-        turn = 1;
-        currentPlayer = PlayerColor.WHITE;
-        piecesOnTheBoard = new ArrayList<>();
-        capturedPieces = new ArrayList<>();
+        this.board = new Board(8, 8);
+        this.turn = 1;
+        this.currentPlayer = PlayerColor.WHITE;
+        this.piecesOnTheBoard = new ArrayList<>();
+        this.capturedPieces = new ArrayList<>();
+        this.matchId = UUID.randomUUID().toString();
         setupInitialPieces();
     }
 
-    /**
-     * Retorna o número atual do turno.
-     *
-     * @return O número do turno.
-     */
     public int getTurn() {
         return turn;
     }
 
-    /**
-     * Retorna a cor do jogador atual.
-     *
-     * @return A cor do jogador atual.
-     */
     public PlayerColor getCurrentPlayer() {
         return currentPlayer;
     }
 
-    /**
-     * Retorna uma matriz bidimensional contendo todas as peças de xadrez presentes no tabuleiro.
-     * A posição [0][0] da matriz corresponde à posição 'a1' do tabuleiro.
-     *
-     * @return Uma matriz de objetos ChessPiece representando todas as peças no tabuleiro.
-     */
     public ChessPiece[][] getPieces() {
         ChessPiece[][] pieceMatrix = new ChessPiece[board.getRows()][board.getColumns()];
         for (int row = 0; row < board.getRows(); row++) {
             for (int col = 0; col < board.getColumns(); col++) {
-                ChessPiece currentPiece = (ChessPiece) board.piece(row, col);
-                pieceMatrix[row][col] = currentPiece;
+                pieceMatrix[row][col] = (ChessPiece) board.piece(row, col);
             }
         }
         return pieceMatrix;
     }
 
-    /**
-     * Verifica se o jogador atual está em xeque.
-     *
-     * @return {@code true} se o jogador atual está em xeque, caso contrário {@code false}.
-     */
-    public boolean getCheck() {
+    public boolean isCheck() {
         return check;
     }
 
-    /**
-     * Verifica se o jogador atual está em xeque-mate.
-     *
-     * @return {@code true} se o jogador atual está em xeque-mate, caso contrário {@code false}.
-     */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean getCheckMate() {
+    public boolean isCheckMate() {
         return checkMate;
     }
 
-    /**
-     * Retorna a peça de xadrez que está vulnerável ao movimento especial en passant.
-     *
-     * @return A peça de xadrez vulnerável ao en passant, ou null se não houver.
-     */
     public ChessPiece getEnPassantVulnerable() {
         return enPassantVulnerable;
     }
 
-    /**
-     * Retorna a peça para qual um peão foi promovido.
-     *
-     * @return A peça promovida, ou {@code null} se não houver.
-     */
     public ChessPiece getPromoted() {
         return promoted;
     }
 
-    /**
-     * Configura as peças iniciais no tabuleiro de xadrez.
-     * Coloca todas as peças nos seus devidos lugares no início da partida.
-     */
     private void setupInitialPieces() {
-        placeNewPiece('a', 1, new Rook(board, PlayerColor.WHITE));
-        placeNewPiece('b', 1, new Knight(board, PlayerColor.WHITE));
-        placeNewPiece('c', 1, new Bishop(board, PlayerColor.WHITE));
-        placeNewPiece('d', 1, new Queen(board, PlayerColor.WHITE));
-        placeNewPiece('e', 1, new King(board, PlayerColor.WHITE, this));
-        placeNewPiece('f', 1, new Bishop(board, PlayerColor.WHITE));
-        placeNewPiece('g', 1, new Knight(board, PlayerColor.WHITE));
-        placeNewPiece('h', 1, new Rook(board, PlayerColor.WHITE));
-        placeNewPiece('a', 2, new Pawn(board, PlayerColor.WHITE, this));
-        placeNewPiece('b', 2, new Pawn(board, PlayerColor.WHITE, this));
-        placeNewPiece('c', 2, new Pawn(board, PlayerColor.WHITE, this));
-        placeNewPiece('d', 2, new Pawn(board, PlayerColor.WHITE, this));
-        placeNewPiece('e', 2, new Pawn(board, PlayerColor.WHITE, this));
-        placeNewPiece('f', 2, new Pawn(board, PlayerColor.WHITE, this));
-        placeNewPiece('g', 2, new Pawn(board, PlayerColor.WHITE, this));
-        placeNewPiece('h', 2, new Pawn(board, PlayerColor.WHITE, this));
+        PlayerColor[] colors = {PlayerColor.WHITE, PlayerColor.BLACK};
+        int[][] initialPositions = {
+                {1, 2},
+                {8, 7}
+        };
 
-        placeNewPiece('a', 8, new Rook(board, PlayerColor.BLACK));
-        placeNewPiece('b', 8, new Knight(board, PlayerColor.BLACK));
-        placeNewPiece('c', 8, new Bishop(board, PlayerColor.BLACK));
-        placeNewPiece('d', 8, new Queen(board, PlayerColor.BLACK));
-        placeNewPiece('e', 8, new King(board, PlayerColor.BLACK, this));
-        placeNewPiece('f', 8, new Bishop(board, PlayerColor.BLACK));
-        placeNewPiece('g', 8, new Knight(board, PlayerColor.BLACK));
-        placeNewPiece('h', 8, new Rook(board, PlayerColor.BLACK));
-        placeNewPiece('a', 7, new Pawn(board, PlayerColor.BLACK, this));
-        placeNewPiece('b', 7, new Pawn(board, PlayerColor.BLACK, this));
-        placeNewPiece('c', 7, new Pawn(board, PlayerColor.BLACK, this));
-        placeNewPiece('d', 7, new Pawn(board, PlayerColor.BLACK, this));
-        placeNewPiece('e', 7, new Pawn(board, PlayerColor.BLACK, this));
-        placeNewPiece('f', 7, new Pawn(board, PlayerColor.BLACK, this));
-        placeNewPiece('g', 7, new Pawn(board, PlayerColor.BLACK, this));
-        placeNewPiece('h', 7, new Pawn(board, PlayerColor.BLACK, this));
+        Class<?>[][] pieceTypes = {
+                {Rook.class, Knight.class, Bishop.class, Queen.class, King.class, Bishop.class, Knight.class, Rook.class},
+                {Pawn.class, Pawn.class, Pawn.class, Pawn.class, Pawn.class, Pawn.class, Pawn.class, Pawn.class}
+        };
+
+        for (int i = 0; i < colors.length; i++) {
+            for (int j = 0; j < 8; j++) {
+                try {
+                    if (pieceTypes[0][j] == King.class) {
+                        placeNewPiece((char) ('a' + j), initialPositions[i][0], new King(board, colors[i], this));
+                    } else {
+                        placeNewPiece((char) ('a' + j), initialPositions[i][0], (ChessPiece) pieceTypes[0][j].getConstructor(Board.class, PlayerColor.class).newInstance(board, colors[i]));
+                    }
+                    placeNewPiece((char) ('a' + j), initialPositions[i][1], new Pawn(board, colors[i], this));
+                } catch (Exception e) {
+                    throw new RuntimeException("Erro ao criar peça inicial.", e);
+                }
+            }
+        }
     }
 
-    /**
-     * Coloca uma nova peça no tabuleiro de xadrez na posição especificada.
-     *
-     * @param column A coluna onde a peça será colocada ('a'-'h').
-     * @param row    A linha onde a peça será colocada (1-8).
-     * @param piece  A peça de xadrez a ser colocada no tabuleiro.
-     * @throws NullPointerException Se a peça fornecida for nula.
-     */
     private void placeNewPiece(final char column, final int row, final ChessPiece piece) {
-        Objects.requireNonNull(piece, "É obrigatório a seleção de uma peça. ");
+        Objects.requireNonNull(piece, "É obrigatório a seleção de uma peça.");
         board.placePiece(piece, new ChessPosition(column, row).toPosition());
         piecesOnTheBoard.add(piece);
     }
 
-    /**
-     * Realiza um movimento de xadrez da posição de origem para a posição de destino.
-     *
-     * @param sourcePosition A posição de origem da peça a ser movida.
-     * @param targetPosition A posição de destino para mover a peça.
-     * @return A peça capturada, se houver.
-     * @throws ChessException Se o movimento for ilegal.
-     */
-    public ChessPiece performChessMove(final ChessPosition sourcePosition, final ChessPosition targetPosition) {
-        var source = sourcePosition.toPosition();
-        var target = targetPosition.toPosition();
+    public ChessPiece performChessMove(final ChessPosition sourcePosition, final ChessPosition targetPosition, String pieceType) {
+        Position source = sourcePosition.toPosition();
+        Position target = targetPosition.toPosition();
         validateSourcePosition(source);
         validateTargetPosition(source, target);
-        var capturedPiece = makeMove(source, target);
-        if (testCheck(currentPlayer)) {
+        Piece capturedPiece = makeMove(source, target);
+
+        if (isCheck(currentPlayer)) {
             undoMove(source, target, capturedPiece);
-            throw new ChessException("Você não pode se colocar em check! ");
+            throw new ChessException("Você não pode se colocar em check!");
         }
+
+        ChessLogUtil.logMove(matchId, currentPlayer, sourcePosition, targetPosition, (ChessPiece) board.piece(target));
 
         var movedPiece = (ChessPiece) board.piece(target);
+        handlePromotion(target, movedPiece, pieceType);
 
-        //  #Movimento especial promoted
-        promoted = null;
-        if (movedPiece instanceof Pawn) {
-            if (movedPiece.getColor().equals(PlayerColor.WHITE) && target.getRow() == 0
-                    || movedPiece.getColor().equals(PlayerColor.BLACK) && target.getRow() == 7) {
-                promoted = (ChessPiece) board.piece(target);
-                promoted = replacePromotedPiece("Q");
-            }
-        }
-
-        check = testCheck(opponent(currentPlayer));
-
-        if (testCheckMate(opponent(currentPlayer))) {
-            checkMate = true;
-        } else {
-            nextTurn();
-        }
-
-        //  #Movimento especial en passant
-        if (movedPiece instanceof Pawn && (target.getRow() == source.getRow() - 2 || target.getRow() == source.getRow() + 2)) {
-            enPassantVulnerable = movedPiece;
-        } else {
-            enPassantVulnerable = null;
-        }
+        updateCheckAndCheckMateStatus();
+        updateEnPassantVulnerability(source, target, movedPiece);
 
         return (ChessPiece) capturedPiece;
     }
 
-    /**
-     * Substitui um peão promovido pelo tipo de peça especificado.
-     *
-     * @param pieceType O tipo de peça para promover ("B", "N", "R", "Q").
-     * @return A nova peça que substitui o peão promovido.
-     * @throws IllegalStateException Se não houver peão para promover.
-     */
-    public ChessPiece replacePromotedPiece(String pieceType) {
+    private void handlePromotion(Position target, ChessPiece movedPiece, String pieceType) {
+        if (movedPiece instanceof Pawn && isPawnPromotable(target, movedPiece.getColor())) {
+            promoted = movedPiece;
+            replacePromotedPiece(pieceType);
+        }
+    }
+
+    private boolean isPawnPromotable(Position target, PlayerColor color) {
+        return (color == PlayerColor.WHITE && target.getRow() == 0) ||
+                (color == PlayerColor.BLACK && target.getRow() == 7);
+    }
+
+    private void updateCheckAndCheckMateStatus() {
+        check = isCheck(opponent(currentPlayer));
+        checkMate = isCheckMate(opponent(currentPlayer));
+        if (!checkMate) {
+            nextTurn();
+        }
+    }
+
+    private void updateEnPassantVulnerability(Position source, Position target, ChessPiece movedPiece) {
+        if (movedPiece instanceof Pawn && Math.abs(target.getRow() - source.getRow()) == 2) {
+            enPassantVulnerable = movedPiece;
+        } else {
+            enPassantVulnerable = null;
+        }
+    }
+
+    public boolean isPromotionPossible(ChessPosition source, ChessPosition target) {
+        Piece piece = board.piece(source.toPosition());
+        return piece instanceof Pawn && (target.row() == 1 || target.row() == 8);
+    }
+
+    public void replacePromotedPiece(String pieceType) {
         if (promoted == null) {
-            throw new IllegalStateException("Não há peça a ser promovida. ");
+            throw new IllegalStateException("Não há peça a ser promovida.");
         }
 
-        if (!pieceType.equals("B") && !pieceType.equals("N") && !pieceType.equals("R") && !pieceType.equals("Q")) {
-            return promoted;
+        if (!isValidPromotionPieceType(pieceType)) {
+            return;
         }
 
-        var position = promoted.getChessPosition().toPosition();
-        var piece = board.removePiece(position);
-        piecesOnTheBoard.remove(piece);
+        Position position = promoted.getChessPosition().toPosition();
+        board.removePiece(position); // Remover a peça antiga
 
-        var newPiece = newPiece(pieceType, promoted.getColor());
+        ChessPiece newPiece = createPromotedPiece(pieceType, promoted.getColor());
+        newPiece.setPosition(position); // Set the position for the new piece
         board.placePiece(newPiece, position);
+        piecesOnTheBoard.remove(promoted);
         piecesOnTheBoard.add(newPiece);
 
-        return newPiece;
+        promoted = null; // Reset promoted after promotion
     }
 
-    /**
-     * Cria uma nova peça do tipo especificado e com a cor fornecida.
-     *
-     * @param pieceType   O tipo de peça ("B", "N", "Q", "R").
-     * @param playerColor A cor do jogador da peça.
-     * @return A nova peça criada.
-     */
-    private ChessPiece newPiece(String pieceType, PlayerColor playerColor) {
+    private boolean isValidPromotionPieceType(String pieceType) {
+        return pieceType.equals("B") || pieceType.equals("N") || pieceType.equals("R") || pieceType.equals("Q");
+    }
 
+    private ChessPiece createPromotedPiece(String pieceType, PlayerColor color) {
         return switch (pieceType) {
-            case "B" -> new Bishop(board, playerColor);
-            case "N" -> new Knight(board, playerColor);
-            case "Q" -> new Queen(board, playerColor);
-            default -> new Rook(board, playerColor);
+            case "Q" -> new Queen(board, color);
+            case "R" -> new Rook(board, color);
+            case "B" -> new Bishop(board, color);
+            case "N" -> new Knight(board, color);
+            default -> throw new IllegalArgumentException("Tipo de peça inválido para promoção: " + pieceType);
         };
-
     }
 
-    /**
-     * Calcula os movimentos possíveis para a peça na posição de origem fornecida.
-     *
-     * @param sourcePosition A posição de origem da peça.
-     * @return Uma matriz booleana indicando os movimentos possíveis.
-     * @throws ChessException Se a posição de origem for inválida.
-     */
     public boolean[][] possibleMoves(final ChessPosition sourcePosition) {
-        var position = sourcePosition.toPosition();
+        Position position = sourcePosition.toPosition();
         validateSourcePosition(position);
         return board.piece(position).possibleMoves();
     }
 
-    /**
-     * Valida se a posição de origem contém uma peça do jogador atual e possui movimentos possíveis.
-     *
-     * @param position A posição de origem a ser validada.
-     * @throws ChessException Se a posição não contiver uma peça ou não tiver movimentos possíveis.
-     */
     private void validateSourcePosition(final Position position) {
         if (!board.thereIsAPiece(position)) {
-            throw new ChessException("Não há peça na posição de origem. ");
+            throw new ChessException("Não há peça na posição de origem.");
         }
-        if (currentPlayer != ((ChessPiece) board.piece(position)).getColor()) {
-            throw new ChessException("A peça escolhida não é sua. ");
+        ChessPiece piece = (ChessPiece) board.piece(position);
+        if (currentPlayer != piece.getColor()) {
+            throw new ChessException("A peça escolhida não é sua.");
         }
-        if (!board.piece(position).isThereAnyPossibleMove()) {
-            throw new ChessException("A peça escolhida não tem movimentos possíveis. ");
+        if (!piece.isThereAnyPossibleMove()) {
+            throw new ChessException("A peça escolhida não tem movimentos possíveis.");
         }
     }
 
-    /**
-     * Valida se a posição de destino é um movimento válido para a peça na posição de origem.
-     *
-     * @param source A posição de origem da peça.
-     * @param target A posição de destino para mover a peça.
-     * @throws ChessException Se o movimento para a posição de destino for inválido.
-     */
     private void validateTargetPosition(final Position source, final Position target) {
         if (!board.piece(source).possibleMove(target)) {
-            throw new ChessException("A peça escolhida não pode mover-se para a posição de destino. ");
+            throw new ChessException("A peça escolhida não pode mover-se para a posição de destino.");
         }
     }
 
-    /**
-     * Executa o movimento da posição de origem para a posição de destino.
-     *
-     * @param source A posição de origem da peça.
-     * @param target A posição de destino para mover a peça.
-     * @return A peça capturada, se houver.
-     */
     private Piece makeMove(final Position source, final Position target) {
-        var movingPiece = (ChessPiece) board.removePiece(source);
+        ChessPiece movingPiece = (ChessPiece) board.removePiece(source);
         movingPiece.increaseMoveCount();
-        var capturedPiece = board.removePiece(target);
+        Piece capturedPiece = board.removePiece(target);
+        if (capturedPiece != null) {
+            capturedPiece.setPosition(target);  // Garanta que a posição da peça capturada é preservada
+        }
         board.placePiece(movingPiece, target);
 
-        if (capturedPiece != null) {
-            piecesOnTheBoard.remove(capturedPiece);
-            capturedPieces.add(capturedPiece);
-        }
-
-        // Verificar roque
-        if (movingPiece instanceof King && Math.abs(target.getColumn() - source.getColumn()) == 2) {
-            Position rookSource, rookTarget;
-            if (target.getColumn() == source.getColumn() + 2) {
-                // Roque do lado do rei
-                rookSource = new Position(source.getRow(), source.getColumn() + 3);
-                rookTarget = new Position(source.getRow(), source.getColumn() + 1);
-            } else {
-                // Roque do lado da rainha
-                rookSource = new Position(source.getRow(), source.getColumn() - 4);
-                rookTarget = new Position(source.getRow(), source.getColumn() - 1);
-            }
-            var rook = (ChessPiece) board.removePiece(rookSource);
-            board.placePiece(rook, rookTarget);
-            rook.increaseMoveCount();
-        }
-
-        // Verificar captura en passant
-        if (movingPiece instanceof Pawn) {
-            if (source.getColumn() != target.getColumn() && capturedPiece == null) {
-                Position pawnPosition;
-                if (movingPiece.getColor() == PlayerColor.WHITE) {
-                    pawnPosition = new Position(target.getRow() + 1, target.getColumn());
-                } else {
-                    pawnPosition = new Position(target.getRow() - 1, target.getColumn());
-                }
-                capturedPiece = board.removePiece(pawnPosition);
-                capturedPieces.add(capturedPiece);
-                piecesOnTheBoard.remove(capturedPiece);
-            }
-        }
+        handleSpecialMoves(source, target, movingPiece, capturedPiece);
 
         return capturedPiece;
     }
 
-    /**
-     * Verifica se o jogador da cor especificada está atualmente em xeque.
-     *
-     * @param playerColor A cor do jogador a ser verificado.
-     * @return {@code true} se o jogador estiver em xeque, caso contrário {@code false}.
-     */
-    private boolean testCheck(final PlayerColor playerColor) {
-        var kingPosition = kingColor(playerColor).getChessPosition().toPosition();
-        var opponentPieceList = piecesOnTheBoard.stream()
-                .filter(pieces -> ((ChessPiece) pieces).getColor().equals(opponent(playerColor))).toList();
-        for (var piece : opponentPieceList) {
-            boolean[][] matrix = piece.possibleMoves();
-            if (matrix[kingPosition.getRow()][kingPosition.getColumn()]) {
-                return true;
-            }
+    private void handleSpecialMoves(Position source, Position target, ChessPiece movingPiece, Piece capturedPiece) {
+        if (movingPiece instanceof King) {
+            handleCastling(source, target);
         }
-        return false;
+
+        if (movingPiece instanceof Pawn) {
+            handleEnPassant(source, target, movingPiece, capturedPiece);
+        }
     }
 
-    /**
-     * Recupera o rei da cor especificada no tabuleiro.
-     *
-     * @param playerColor A cor do rei a ser recuperado.
-     * @return A peça do rei da cor especificada.
-     * @throws IllegalStateException Se o rei da cor especificada não existir.
-     */
-    private ChessPiece kingColor(final PlayerColor playerColor) {
+    private void handleCastling(Position source, Position target) {
+        if (Math.abs(target.getColumn() - source.getColumn()) == 2) {
+            Position rookSource = target.getColumn() == source.getColumn() + 2 ?
+                    new Position(source.getRow(), source.getColumn() + 3) :
+                    new Position(source.getRow(), source.getColumn() - 4);
+
+            Position rookTarget = target.getColumn() == source.getColumn() + 2 ?
+                    new Position(source.getRow(), source.getColumn() + 1) :
+                    new Position(source.getRow(), source.getColumn() - 1);
+
+            ChessPiece rook = (ChessPiece) board.removePiece(rookSource);
+            board.placePiece(rook, rookTarget);
+            rook.increaseMoveCount();
+        }
+    }
+
+    private void handleEnPassant(Position source, Position target, ChessPiece movingPiece, Piece capturedPiece) {
+        if (source.getColumn() != target.getColumn() && capturedPiece == null) {
+            Position pawnPosition = movingPiece.getColor() == PlayerColor.WHITE ?
+                    new Position(target.getRow() + 1, target.getColumn()) :
+                    new Position(target.getRow() - 1, target.getColumn());
+            capturedPiece = board.removePiece(pawnPosition);
+            capturedPieces.add(capturedPiece);
+            piecesOnTheBoard.remove(capturedPiece);
+        }
+    }
+
+    private boolean isCheck(final PlayerColor playerColor) {
+        Position kingPosition = findKing(playerColor).getChessPosition().toPosition();
+        return piecesOnTheBoard.stream()
+                .filter(piece -> ((ChessPiece) piece).getColor() == opponent(playerColor))
+                .map(Piece::possibleMoves)
+                .anyMatch(moves -> moves[kingPosition.getRow()][kingPosition.getColumn()]);
+    }
+
+    private ChessPiece findKing(final PlayerColor playerColor) {
         return (ChessPiece) piecesOnTheBoard.stream()
-                .filter(pieces -> ((ChessPiece) pieces).getColor().equals(playerColor))
+                .filter(piece -> ((ChessPiece) piece).getColor() == playerColor)
                 .filter(piece -> piece instanceof King)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException(String.format("Não existe o rei da cor: %s", playerColor)));
     }
 
-    /**
-     * Recupera a cor oponente da cor de jogador fornecida.
-     *
-     * @param playerColor A cor do jogador para encontrar o oponente.
-     * @return A cor oponente do jogador.
-     */
     private PlayerColor opponent(final PlayerColor playerColor) {
-        return switch (playerColor) {
-            case WHITE -> PlayerColor.BLACK;
-            case BLACK -> PlayerColor.WHITE;
-        };
+        return playerColor == PlayerColor.WHITE ? PlayerColor.BLACK : PlayerColor.WHITE;
     }
 
-    /**
-     * Desfaz o último movimento da posição de destino para a posição de origem.
-     *
-     * @param source        A posição de origem da peça antes do movimento.
-     * @param target        A posição de destino da peça após o movimento.
-     * @param capturedPiece A peça capturada, se houver, para restaurar.
-     */
     private void undoMove(final Position source, final Position target, Piece capturedPiece) {
-        var piece = (ChessPiece) board.removePiece(target);
+        ChessPiece piece = (ChessPiece) board.removePiece(target);
         piece.decreaseMoveCount();
         board.placePiece(piece, source);
 
         if (capturedPiece != null) {
+            capturedPiece.setPosition(target); // Restore position for the captured piece
             board.placePiece(capturedPiece, target);
             capturedPieces.remove(capturedPiece);
             piecesOnTheBoard.add(capturedPiece);
         }
 
-        //  Testar castling do lado do rei
-        if (piece instanceof King && target.getColumn() == source.getColumn() + 2) {
-            var sourceRook = new Position(source.getRow(), source.getColumn() + 3);
-            var targetRook = new Position(source.getRow(), source.getColumn() + 1);
-            var rook = (ChessPiece) board.removePiece(targetRook);
-            board.placePiece(rook, sourceRook);
-            rook.decreaseMoveCount();
-        }
-
-        //  Testar castling do lado da rainha
-        if (piece instanceof King && target.getColumn() == source.getColumn() - 2) {
-            var sourceRook = new Position(source.getRow(), source.getColumn() - 4);
-            var targetRook = new Position(source.getRow(), source.getColumn() - 1);
-            var rook = (ChessPiece) board.removePiece(targetRook);
-            board.placePiece(rook, sourceRook);
-            rook.decreaseMoveCount();
-        }
-
-        //  Testar en passant
-        if (piece instanceof Pawn) {
-            if (source.getColumn() != target.getColumn() && capturedPiece == enPassantVulnerable) {
-                var pawn = (ChessPiece) board.removePiece(target);
-                Position pawnPosition;
-                if (piece.getColor().equals(PlayerColor.WHITE)) {
-                    pawnPosition = new Position(3, target.getColumn());
-                } else {
-                    pawnPosition = new Position(4, target.getColumn());
-                }
-                board.placePiece(pawn, pawnPosition);
-            }
-        }
-
+        undoSpecialMoves(source, target, piece);
     }
 
-    /**
-     * Avança para o próximo turno, alterando o jogador atual.
-     */
+    private void undoSpecialMoves(Position source, Position target, ChessPiece piece) {
+        if (piece instanceof King) {
+            undoCastling(source, target);
+        }
+
+        if (piece instanceof Pawn) {
+            undoEnPassant(source, target, piece);
+        }
+    }
+
+    private void undoCastling(Position source, Position target) {
+        if (Math.abs(target.getColumn() - source.getColumn()) == 2) {
+            Position rookSource = target.getColumn() == source.getColumn() + 2 ?
+                    new Position(source.getRow(), source.getColumn() + 3) :
+                    new Position(source.getRow(), source.getColumn() - 4);
+
+            Position rookTarget = target.getColumn() == source.getColumn() + 2 ?
+                    new Position(source.getRow(), source.getColumn() + 1) :
+                    new Position(source.getRow(), source.getColumn() - 1);
+
+            ChessPiece rook = (ChessPiece) board.removePiece(rookTarget);
+            board.placePiece(rook, rookSource);
+            rook.decreaseMoveCount();
+        }
+    }
+
+    private void undoEnPassant(Position source, Position target, ChessPiece piece) {
+        if (source.getColumn() != target.getColumn() && enPassantVulnerable != null) {
+            ChessPiece pawn = (ChessPiece) board.removePiece(target);
+            Position pawnPosition = piece.getColor() == PlayerColor.WHITE ?
+                    new Position(3, target.getColumn()) :
+                    new Position(4, target.getColumn());
+            board.placePiece(pawn, pawnPosition);
+        }
+    }
+
     private void nextTurn() {
         turn++;
         currentPlayer = opponent(currentPlayer);
     }
 
-    /**
-     * Verifica se o jogador da cor especificada está em xeque-mate.
-     *
-     * @param playerColor A cor do jogador a ser verificado.
-     * @return {@code true} se o jogador estiver em xeque-mate, caso contrário {@code false}.
-     * @throws NullPointerException Se a cor do jogador for {@code null}.
-     */
-    private boolean testCheckMate(final PlayerColor playerColor) {
-        Objects.requireNonNull(playerColor, "A cor não pode ser nula. ");
-
-        if (!testCheck(playerColor)) {
+    private boolean isCheckMate(final PlayerColor playerColor) {
+        if (!isCheck(playerColor)) {
             return false;
         }
 
-        var pieceList = piecesOnTheBoard.stream()
-                .filter(pieces -> ((ChessPiece) pieces).getColor().equals(playerColor)).toList();
-
-        return pieceList.stream().noneMatch(piece -> canPieceAvoidCheck(piece, playerColor));
+        return piecesOnTheBoard.stream()
+                .filter(piece -> ((ChessPiece) piece).getColor() == playerColor)
+                .noneMatch(piece -> canPieceAvoidCheck(piece, playerColor));
     }
 
-    /**
-     * Verifica se a peça fornecida da cor especificada pode evitar colocar o jogador em xeque.
-     *
-     * @param piece       A peça para verificar os movimentos possíveis.
-     * @param playerColor A cor do jogador a ser verificada.
-     * @return {@code true} se a peça puder evitar colocar o jogador em xeque, caso contrário {@code false}.
-     */
     private boolean canPieceAvoidCheck(final Piece piece, final PlayerColor playerColor) {
-        boolean[][] matrix = piece.possibleMoves();
+        boolean[][] possibleMoves = piece.possibleMoves();
         for (int row = 0; row < board.getRows(); row++) {
             for (int column = 0; column < board.getColumns(); column++) {
-                if (matrix[row][column]) {
-                    var source = ((ChessPiece) piece).getChessPosition().toPosition();
-                    var target = new Position(row, column);
-                    var capturedPiece = makeMove(source, target);
-                    boolean testCheck = testCheck(playerColor);
+                if (possibleMoves[row][column]) {
+                    Position source = ((ChessPiece) piece).getChessPosition().toPosition();
+                    Position target = new Position(row, column);
+                    Piece capturedPiece = makeMove(source, target);
+                    boolean checkAfterMove = isCheck(playerColor);
                     undoMove(source, target, capturedPiece);
-                    if (!testCheck) {
+                    if (!checkAfterMove) {
                         return true;
                     }
                 }

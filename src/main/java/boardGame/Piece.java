@@ -5,22 +5,14 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Representa uma peça genérica do jogo de xadrez. Esta classe abstrata define comportamentos comuns
- * a todas as peças do jogo, como posição atual no tabuleiro, métodos para calcular movimentos possíveis
- * e verificação de disponibilidade de movimentos.
+ * Classe que representa uma peça genérica em um jogo de tabuleiro.
+ * Gerencia a posição da peça no tabuleiro e fornece métodos para manipular e consultar essa posição.
  * <p>
  * Esta classe implementa Serializable para permitir que o estado do objeto
  * seja salvo e carregado de um arquivo, ou transmitido pela rede.
  */
 public abstract class Piece implements Serializable {
 
-    /**
-     * Identificador de versão da classe para fins de serialização.
-     * <p>
-     * Este identificador é utilizado pelo mecanismo de serialização
-     * para assegurar que a versão da classe que está sendo serializada
-     * seja compatível com a versão da classe que está sendo desserializada.
-     */
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -28,54 +20,55 @@ public abstract class Piece implements Serializable {
     private final Board board;
 
     /**
-     * Construtor que inicializa uma peça com o tabuleiro associado e posição nula.
+     * Construtor que inicializa uma peça com o tabuleiro associado.
      *
      * @param board O tabuleiro onde a peça está posicionada.
      * @throws NullPointerException Se o tabuleiro fornecido for nulo.
      */
-    public Piece(final Board board) {
-        this.board = Objects.requireNonNull(board, "O tabuleiro não pode ser nulo. ");
-        position = null;
+    public Piece(Board board) {
+        this.board = Objects.requireNonNull(board, "O tabuleiro não pode ser nulo.");
+        position = null;  // Posição inicial é nula
     }
 
-    /**
-     * Retorna o tabuleiro associado a esta peça.
-     *
-     * @return O tabuleiro associado a esta peça.
-     */
-    protected Board getBoard() {
+    public Position getPosition() {
+        return position;
+    }
+
+    public void setPosition(Position position) {
+        this.position = position;
+    }
+
+    public Board getBoard() {
         return board;
     }
 
     /**
-     * Método abstrato que deve ser implementado por subclasses para calcular os movimentos possíveis da peça.
+     * Método abstrato que deve ser implementado por subclasses para definir os movimentos possíveis da peça.
      *
-     * @return Uma matriz booleana representando os movimentos possíveis da peça.
+     * @return Uma matriz booleana indicando os movimentos possíveis.
      */
     public abstract boolean[][] possibleMoves();
 
     /**
-     * Verifica se a peça pode se mover para a posição especificada.
+     * Verifica se a peça pode mover-se para a posição fornecida.
      *
-     * @param position A posição para verificar se é um movimento possível.
-     * @return true se a peça pode se mover para a posição especificada, false caso contrário.
-     * @throws NullPointerException Se a posição fornecida for nula.
+     * @param position A posição a ser verificada.
+     * @return true se a peça pode mover-se para a posição fornecida, false caso contrário.
      */
-    public boolean possibleMove(final Position position) {
-        Objects.requireNonNull(position, "A posição não pode ser nula. ");
+    public boolean possibleMove(Position position) {
         return possibleMoves()[position.getRow()][position.getColumn()];
     }
 
     /**
-     * Verifica se há pelo menos um movimento possível para a peça.
+     * Verifica se a peça tem pelo menos um movimento possível.
      *
-     * @return true se há pelo menos um movimento possível, false caso contrário.
+     * @return true se a peça tem pelo menos um movimento possível, false caso contrário.
      */
     public boolean isThereAnyPossibleMove() {
-        boolean[][] possibleMoves = possibleMoves();
-        for (boolean[] row : possibleMoves) {
-            for (boolean cell : row) {
-                if (cell) {
+        boolean[][] moves = possibleMoves();
+        for (boolean[] row : moves) {
+            for (boolean move : row) {
+                if (move) {
                     return true;
                 }
             }
