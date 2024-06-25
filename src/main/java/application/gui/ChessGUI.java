@@ -424,4 +424,5 @@ public class ChessGUI extends JFrame {
             g.fillRect(0, 0, getWidth(), getHeight());
         }
     }
+
 }

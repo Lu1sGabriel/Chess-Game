@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
+
 
 /**
  * A classe MainMenu representa o menu principal do aplicativo de jogo de xadrez.
@@ -79,9 +81,13 @@ public class MainMenu extends JFrame {
      * Inicia um novo jogo lançando o ChessGUI e fechando o menu principal.
      */
     private void startNewGame() {
-        SwingUtilities.invokeLater(() -> {
-            new ChessGUI();
-            dispose();
+        showLoadingScreen("Carregando novo jogo...");
+        CompletableFuture.runAsync(() -> {
+            ChessGUI chessGUI = new ChessGUI();
+            SwingUtilities.invokeLater(() -> {
+                chessGUI.setVisible(true);
+                dispose();
+            });
         });
     }
 
@@ -95,15 +101,18 @@ public class MainMenu extends JFrame {
         int userSelection = fileChooser.showOpenDialog(this);
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             Path filePath = fileChooser.getSelectedFile().toPath();
-            try {
-                ChessMatch chessMatch = ChessSaveUtil.loadMatch(filePath);
-                SwingUtilities.invokeLater(() -> {
-                    new ChessGUI(chessMatch);
-                    dispose();
-                });
-            } catch (IOException | ClassNotFoundException e) {
-                showErrorDialog("Erro ao carregar a partida: " + e.getMessage());
-            }
+            showLoadingScreen("Carregando partida...");
+            CompletableFuture.runAsync(() -> {
+                try {
+                    ChessMatch chessMatch = ChessSaveUtil.loadMatch(filePath);
+                    SwingUtilities.invokeLater(() -> {
+                        new ChessGUI(chessMatch).setVisible(true);
+                        dispose();
+                    });
+                } catch (IOException | ClassNotFoundException e) {
+                    SwingUtilities.invokeLater(() -> showErrorDialog("Erro ao carregar a partida: " + e.getMessage()));
+                }
+            });
         }
     }
 
@@ -114,6 +123,29 @@ public class MainMenu extends JFrame {
      */
     private void showErrorDialog(String message) {
         JOptionPane.showMessageDialog(this, message);
+    }
+
+    /**
+     * Exibe uma tela de carregamento com uma mensagem especificada.
+     *
+     * @param message a mensagem a ser exibida na tela de carregamento
+     */
+    private void showLoadingScreen(String message) {
+        JDialog loadingDialog = new JDialog(this, "Aguarde", true);
+        JLabel loadingLabel = new JLabel(message, SwingConstants.CENTER);
+        loadingLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        loadingDialog.add(loadingLabel);
+        loadingDialog.setSize(300, 100);
+        loadingDialog.setLocationRelativeTo(this);
+        SwingUtilities.invokeLater(() -> loadingDialog.setVisible(true));
+        CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(2000); // Simula o tempo de carregamento
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            SwingUtilities.invokeLater(loadingDialog::dispose);
+        });
     }
 
     /**
