@@ -1,8 +1,7 @@
 # Chess-Game
 
 Este é um projeto de um jogo de xadrez desenvolvido em Java, projetado para oferecer uma experiência rica e interativa
-aos usuários. O jogo inclui uma interface gráfica de usuário (GUI) intuitiva para facilitar o jogo de xadrez, bem como
-uma interface de linha de comando (console) para uma interação direta e eficiente. Além disso, o projeto segue
+aos usuários. O jogo inclui uma interface gráfica de usuário (GUI) intuitiva para facilitar o jogo de xadrez. Além disso, o projeto segue
 princípios de código limpo e incorpora melhores práticas em Java para garantir um código bem estruturado, reutilizável e
 fácil de manter.
 
